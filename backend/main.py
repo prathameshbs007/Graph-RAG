@@ -4,7 +4,11 @@ from config import settings
 import weaviate
 from neo4j import GraphDatabase
 
+from routers import ingest
+
 app = FastAPI(title="ResearchOS")
+
+app.include_router(ingest.router)
 
 app.add_middleware(
     CORSMiddleware,

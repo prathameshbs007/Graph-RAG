@@ -12,3 +12,5 @@ open_clip_torch
 Pillow
 torch
 torchvision
+requests
+python-multipart
