@@ -4,11 +4,18 @@ from config import settings
 import weaviate
 from neo4j import GraphDatabase
 
-from routers import ingest
+from routers import ingest, query
+from fastapi.staticfiles import StaticFiles
+import os
 
 app = FastAPI(title="ResearchOS")
 
 app.include_router(ingest.router)
+app.include_router(query.router)
+
+# Mount figures directory
+os.makedirs(settings.FIGURES_DIR, exist_ok=True)
+app.mount("/figures", StaticFiles(directory=settings.FIGURES_DIR), name="figures")
 
 app.add_middleware(
     CORSMiddleware,

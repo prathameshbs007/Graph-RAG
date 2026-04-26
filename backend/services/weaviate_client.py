@@ -59,8 +59,45 @@ class WeaviateDB:
                 vector = chunk.get("vector")
                 batch.add_data_object(
                     data_object=properties,
-                    class_name="AudioChunk",
                     vector=vector
                 )
+
+    def search_all_classes(self, query_vector: list[float], limit: int = 10) -> list[dict]:
+        results = []
+        # Standardize retrieval field mapping across classes
+        fields_map = {
+            "TextChunk": ["paper_id", "paper_title", "chunk_text", "authors", "year"],
+            "FigureChunk": ["paper_id", "paper_title", "figure_id", "caption", "file_path", "page"],
+            "AudioChunk": ["source_paper_id", "title", "chunk_text"]
+        }
+        for cls, fields in fields_map.items():
+            try:
+                res = (
+                    self.client.query
+                    .get(cls, fields)
+                    .with_near_vector({"vector": query_vector})
+                    .with_limit(limit)
+                    .with_additional("certainty")
+                    .do()
+                )
+                if "data" in res and "Get" in res["data"] and cls in res["data"]["Get"]:
+                    for item in res["data"]["Get"][cls]:
+                        item_copy = dict(item)
+                        item_copy["modality"] = "text" if cls == "TextChunk" else ("image" if cls == "FigureChunk" else "audio")
+                        item_copy["score"] = item_copy.pop("_additional", {}).get("certainty", 0)
+                        
+                        # Normalize common fields for uniform processing
+                        if cls == "AudioChunk":
+                            item_copy["paper_id"] = item_copy.get("source_paper_id", "")
+                            item_copy["paper_title"] = item_copy.get("title", "")
+                            
+                        item_copy["chunk_text"] = item_copy.get("chunk_text") or item_copy.get("caption", "")
+                        item_copy["chunk_id"] = "chunk_" + str(hash(item_copy["chunk_text"]))
+                        results.append(item_copy)
+            except Exception as e:
+                print(f"Error searching {cls}: {e}")
+        
+        results.sort(key=lambda x: x["score"], reverse=True)
+        return results[:limit]
 
 db = WeaviateDB()

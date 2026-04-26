@@ -5,10 +5,16 @@ from config import settings
 class AudioTranscriber:
     def __init__(self):
         self.model_size = settings.WHISPER_MODEL
-        self.model = WhisperModel(self.model_size, device="cpu", compute_type="int8")
+        self._model = None
 
+    def _lazy_init(self):
+        if self._model is None:
+            print("Downloading/Loading Whisper model...")
+            self._model = WhisperModel(self.model_size, device="cpu", compute_type="int8")
+            
     def transcribe(self, file_path: str):
-        segments, info = self.model.transcribe(file_path, beam_size=5)
+        self._lazy_init()
+        segments, info = self._model.transcribe(file_path, beam_size=5)
         
         chunks_data = []
         duration = info.duration
