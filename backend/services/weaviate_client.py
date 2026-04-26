@@ -44,4 +44,23 @@ class WeaviateDB:
                     vector=vector
                 )
 
+    def insert_audio_chunks(self, chunks: list[dict]):
+        with self.client.batch as batch:
+            batch.batch_size=100
+            for chunk in chunks:
+                properties = {
+                    "audio_id": chunk.get("audio_id"),
+                    "title": chunk.get("title"),
+                    "chunk_text": chunk.get("chunk_text"),
+                    "start_time": chunk.get("start_time"),
+                    "end_time": chunk.get("end_time"),
+                    "source_paper_id": chunk.get("source_paper_id", ""),
+                }
+                vector = chunk.get("vector")
+                batch.add_data_object(
+                    data_object=properties,
+                    class_name="AudioChunk",
+                    vector=vector
+                )
+
 db = WeaviateDB()

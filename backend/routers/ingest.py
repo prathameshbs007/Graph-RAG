@@ -68,3 +68,51 @@ async def ingest_pdf(
         graph_nodes_created=1 + len(author_list),
         status="success"
     )
+
+from models.ingest import IngestAudioResponse
+from services.audio_transcriber import transcriber
+
+@router.post("/audio", response_model=IngestAudioResponse)
+async def ingest_audio(
+    file: UploadFile = File(...),
+    title: str = Form(None),
+    source_paper_id: str = Form(None)
+):
+    audio_id = str(uuid.uuid4())
+    audio_path = f"/tmp/{audio_id}_{file.filename}"
+    
+    with open(audio_path, "wb") as f:
+        f.write(await file.read())
+        
+    audio_title = title if title else file.filename
+    
+    # Transcribe
+    chunks_data, duration, num_segments = transcriber.transcribe(audio_path)
+    
+    # Process text chunks
+    for chunk in chunks_data:
+        chunk["audio_id"] = audio_id
+        chunk["title"] = audio_title
+        chunk["source_paper_id"] = source_paper_id if source_paper_id else ""
+        chunk["vector"] = get_text_embedding(chunk["chunk_text"])
+        
+    # DB insert
+    try:
+        db.insert_audio_chunks(chunks_data)
+    except Exception as e:
+        print(f"Failed to ingest audio: {e}")
+        return IngestAudioResponse(
+            audio_id=audio_id,
+            segments=num_segments,
+            chunks_created=0,
+            duration_seconds=float(duration),
+            status=f"error: {str(e)}"
+        )
+        
+    return IngestAudioResponse(
+        audio_id=audio_id,
+        segments=num_segments,
+        chunks_created=len(chunks_data),
+        duration_seconds=float(duration),
+        status="success"
+    )
