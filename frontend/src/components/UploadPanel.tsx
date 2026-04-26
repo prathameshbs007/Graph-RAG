@@ -32,7 +32,7 @@ export const UploadPanel = () => {
         try {
             setProgress(40);
             const endpoint = isAudio ? '/ingest/audio' : '/ingest/pdf';
-            const res = await fetch(`http://localhost:8000${endpoint}`, {
+            const res = await fetch(`http://localhost:8054${endpoint}`, {
                 method: 'POST',
                 body: formData
             });
