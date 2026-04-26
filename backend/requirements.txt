@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+pydantic
+pydantic-settings
+weaviate-client<4.0.0
+neo4j
+cohere
+groq
+pymupdf
+faster-whisper
+open_clip_torch
+Pillow
+torch
+torchvision
