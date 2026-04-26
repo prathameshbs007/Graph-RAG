@@ -4,7 +4,7 @@ from config import settings
 import weaviate
 from neo4j import GraphDatabase
 
-from routers import ingest, query
+from routers import ingest, query, graph
 from fastapi.staticfiles import StaticFiles
 import os
 
@@ -12,6 +12,7 @@ app = FastAPI(title="ResearchOS")
 
 app.include_router(ingest.router)
 app.include_router(query.router)
+app.include_router(graph.router)
 
 # Mount figures directory
 os.makedirs(settings.FIGURES_DIR, exist_ok=True)
