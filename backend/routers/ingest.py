@@ -32,13 +32,16 @@ async def ingest_pdf(
     figures_dir = settings.FIGURES_DIR
     chunks_data, figures_data = extract_pdf_data(pdf_path, paper_id, figures_dir)
     
-    # Process text chunks
-    for chunk in chunks_data:
-        chunk["paper_id"] = paper_id
-        chunk["paper_title"] = paper_title
-        chunk["authors"] = author_list
-        chunk["year"] = paper_year
-        chunk["vector"] = get_text_embedding(chunk["chunk_text"])
+    # Process text chunks using batching for massive speedup
+    if chunks_data:
+        texts = [chunk["chunk_text"] for chunk in chunks_data]
+        embeddings = get_text_embedding(texts)
+        for i, chunk in enumerate(chunks_data):
+            chunk["paper_id"] = paper_id
+            chunk["paper_title"] = paper_title
+            chunk["authors"] = author_list
+            chunk["year"] = paper_year
+            chunk["vector"] = embeddings[i] if i < len(embeddings) else []
         
     # Process figures
     for fig in figures_data:
@@ -90,11 +93,14 @@ async def ingest_audio(
     chunks_data, duration, num_segments = transcriber.transcribe(audio_path)
     
     # Process text chunks
-    for chunk in chunks_data:
-        chunk["audio_id"] = audio_id
-        chunk["title"] = audio_title
-        chunk["source_paper_id"] = source_paper_id if source_paper_id else ""
-        chunk["vector"] = get_text_embedding(chunk["chunk_text"])
+    if chunks_data:
+        texts = [chunk["chunk_text"] for chunk in chunks_data]
+        embeddings = get_text_embedding(texts)
+        for i, chunk in enumerate(chunks_data):
+            chunk["audio_id"] = audio_id
+            chunk["title"] = audio_title
+            chunk["source_paper_id"] = source_paper_id if source_paper_id else ""
+            chunk["vector"] = embeddings[i] if i < len(embeddings) else []
         
     # DB insert
     try:

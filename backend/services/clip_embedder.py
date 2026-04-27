@@ -32,4 +32,17 @@ class ClipEmbedder:
             print(f"Failed to get image embedding: {e}")
             return []
 
+    def get_text_embedding_for_clip(self, text: str) -> list[float]:
+        self._lazy_init()
+        try:
+            tokenizer = open_clip.get_tokenizer(settings.CLIP_MODEL)
+            text_tokens = tokenizer([text]).to(self.device)
+            with torch.no_grad():
+                text_features = self._model.encode_text(text_tokens)
+                text_features /= text_features.norm(dim=-1, keepdim=True)
+            return text_features.cpu().numpy()[0].tolist()
+        except Exception as e:
+            print(f"Failed to get CLIP text embedding: {e}")
+            return []
+
 clip_embedder = ClipEmbedder()

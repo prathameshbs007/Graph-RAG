@@ -49,7 +49,6 @@ def extract_pdf_data(file_path: str, paper_id: str, output_dir: str):
             
             try:
                 pil_img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
-                pil_img = pil_img.resize((224, 224))
                 pil_img.save(image_filepath)
                 
                 figures_data.append({
@@ -60,7 +59,7 @@ def extract_pdf_data(file_path: str, paper_id: str, output_dir: str):
                 })
             except Exception as e:
                 print(f"Failed to process image {fig_id}: {e}")
-
+            
     doc.close()
     
     for i, c in enumerate(chunks_data):

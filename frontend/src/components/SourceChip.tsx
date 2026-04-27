@@ -1,4 +1,4 @@
-import React from 'react';
+
 
 export const SourceChip = ({ index, source }: { index: number, source: any }) => {
     const isAudio = source.modality === 'audio';

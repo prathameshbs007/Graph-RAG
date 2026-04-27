@@ -62,7 +62,7 @@ class WeaviateDB:
                     vector=vector
                 )
 
-    def search_all_classes(self, query_vector: list[float], limit: int = 10) -> list[dict]:
+    def search_all_classes(self, query_vector: list[float], clip_vector: list[float] = None, limit: int = 10) -> list[dict]:
         results = []
         # Standardize retrieval field mapping across classes
         fields_map = {
@@ -72,16 +72,18 @@ class WeaviateDB:
         }
         for cls, fields in fields_map.items():
             try:
+                target_vector = clip_vector if cls == "FigureChunk" and clip_vector else query_vector
                 res = (
                     self.client.query
                     .get(cls, fields)
-                    .with_near_vector({"vector": query_vector})
+                    .with_near_vector({"vector": target_vector})
                     .with_limit(limit)
                     .with_additional("certainty")
                     .do()
                 )
-                if "data" in res and "Get" in res["data"] and cls in res["data"]["Get"]:
-                    for item in res["data"]["Get"][cls]:
+                items = res.get("data", {}).get("Get", {}).get(cls)
+                if items:
+                    for item in items:
                         item_copy = dict(item)
                         item_copy["modality"] = "text" if cls == "TextChunk" else ("image" if cls == "FigureChunk" else "audio")
                         item_copy["score"] = item_copy.pop("_additional", {}).get("certainty", 0)
@@ -97,7 +99,9 @@ class WeaviateDB:
             except Exception as e:
                 print(f"Error searching {cls}: {e}")
         
+        # Sort the overall results for good measure, but do not truncate globally.
+        # Top-K was already applied per-class by .with_limit(limit) inside the loop! 
         results.sort(key=lambda x: x["score"], reverse=True)
-        return results[:limit]
+        return results
 
 db = WeaviateDB()

@@ -17,6 +17,13 @@ services:
       weaviate: { condition: service_healthy }
       neo4j:    { condition: service_healthy }
       ollama:   { condition: service_started }
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
 
   weaviate:
     image: semitechnologies/weaviate:1.24.1
@@ -52,6 +59,13 @@ services:
     ports: ["11434:11434"]
     volumes: [ollama_data:/root/.ollama]
     entrypoint: ["/bin/sh", "-c", "ollama serve & sleep 5 && ollama pull nomic-embed-text && wait"]
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
 
 volumes:
   weaviate_data:

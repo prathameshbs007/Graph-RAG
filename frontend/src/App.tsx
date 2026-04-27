@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { UploadPanel } from './components/UploadPanel';
 import { QueryBar } from './components/QueryBar';
 import { AnswerCard } from './components/AnswerCard';

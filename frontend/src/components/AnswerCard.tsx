@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { SourceChip } from './SourceChip';
 import { FigureCitation } from './FigureCitation';
 
