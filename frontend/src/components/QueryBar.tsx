@@ -9,6 +9,7 @@ export const QueryBar = ({
   loading: boolean;
 }) => {
   const [text, setText] = useState("");
+  const [isFocused, setIsFocused] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,86 +18,105 @@ export const QueryBar = ({
     }
   };
 
+  const suggestions = [
+    { query: "What are the main concepts?", icon: "🎯" },
+    { query: "Show relationships between topics", icon: "🔗" },
+    { query: "Summarize key findings", icon: "📋" },
+  ];
+
   return (
-    <form onSubmit={handleSubmit} className="w-full max-w-2xl">
+    <form onSubmit={handleSubmit} className="w-full max-w-3xl space-y-6">
+      {/* Main Search Input */}
       <div className="relative group">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full blur opacity-75 group-hover:opacity-100 transition duration-300"></div>
-        <div className="relative flex items-center bg-white rounded-full shadow-xl overflow-hidden border border-gray-200">
-          <Search className="text-gray-400 w-5 h-5 ml-6 mr-2 flex-shrink-0" />
-          <input
-            type="text"
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            placeholder="Ask about your documents, concepts, relationships..."
-            className="flex-1 outline-none py-4 px-3 text-base bg-transparent text-gray-800 placeholder:text-gray-500"
-            disabled={loading}
-          />
-          <button
-            type="submit"
-            disabled={loading || !text.trim()}
-            className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full px-8 py-4 mr-1 hover:shadow-lg hover:from-blue-700 hover:to-indigo-700 font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none flex items-center gap-2"
-          >
-            {loading ? (
-              <>
-                <svg
-                  className="animate-spin h-4 w-4"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  ></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
-                </svg>
-                Searching...
-              </>
-            ) : (
-              <>
-                <Search className="w-4 h-4" />
-                Search
-              </>
-            )}
-          </button>
+        {/* Glow effect */}
+        <div
+          className={`absolute -inset-1 bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-600 rounded-2xl blur-xl opacity-0 transition-all duration-500 ${
+            isFocused ? "opacity-75" : "opacity-0"
+          } group-hover:opacity-50`}
+        ></div>
+
+        {/* Search Container */}
+        <div className="relative glass-dark border border-white/20 rounded-2xl overflow-hidden transition-all duration-300">
+          <div className="flex items-center px-6 py-4 gap-3">
+            {/* Search Icon */}
+            <Search className="w-5 h-5 text-cyan-400 flex-shrink-0" />
+
+            {/* Input */}
+            <input
+              type="text"
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              onFocus={() => setIsFocused(true)}
+              onBlur={() => setIsFocused(false)}
+              placeholder="Ask anything about your documents..."
+              className="flex-1 outline-none bg-transparent text-white placeholder-gray-500 text-lg font-medium"
+              disabled={loading}
+            />
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={loading || !text.trim()}
+              className="flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-blue-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 relative overflow-hidden group btn-glow"
+            >
+              {loading ? (
+                <>
+                  <svg
+                    className="animate-spin h-5 w-5"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  Searching
+                </>
+              ) : (
+                <>
+                  <Search className="w-5 h-5" />
+                  Search
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Quick suggestion pills */}
-      <div className="mt-4 flex flex-wrap gap-2 justify-center">
-        <div className="text-xs text-gray-500 font-medium w-full text-center mb-1">
-          Try asking:
+      {/* Quick Suggestions */}
+      {!text && (
+        <div className="space-y-3">
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest pl-2">
+            Quick Suggestions:
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {suggestions.map((item, idx) => (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => setText(item.query)}
+                className="glass-dark border border-white/10 rounded-xl p-3 text-left hover:border-cyan-400/50 hover:bg-cyan-400/5 transition-all duration-200 group text-sm font-medium text-gray-300 hover:text-white"
+              >
+                <span className="text-lg mb-2 block group-hover:scale-110 transition-transform">
+                  {item.icon}
+                </span>
+                {item.query}
+              </button>
+            ))}
+          </div>
         </div>
-        <button
-          type="button"
-          onClick={() => setText("What are the main concepts?")}
-          className="text-xs bg-white hover:bg-blue-50 border border-gray-300 rounded-full px-3 py-1.5 text-gray-700 transition-colors"
-        >
-          Main concepts
-        </button>
-        <button
-          type="button"
-          onClick={() => setText("Show me relationships between topics")}
-          className="text-xs bg-white hover:bg-blue-50 border border-gray-300 rounded-full px-3 py-1.5 text-gray-700 transition-colors"
-        >
-          Relationships
-        </button>
-        <button
-          type="button"
-          onClick={() => setText("Summarize the key findings")}
-          className="text-xs bg-white hover:bg-blue-50 border border-gray-300 rounded-full px-3 py-1.5 text-gray-700 transition-colors"
-        >
-          Summarize
-        </button>
-      </div>
+      )}
     </form>
   );
 };

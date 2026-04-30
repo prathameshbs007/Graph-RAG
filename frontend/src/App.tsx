@@ -4,120 +4,167 @@ import { QueryBar } from "./components/QueryBar";
 import { AnswerCard } from "./components/AnswerCard";
 import { GraphExplorer } from "./components/GraphExplorer";
 import { ClearDBButton } from "./components/ClearDBButton";
+import { UploadNotification } from "./components/UploadNotification";
+import { UploadProvider } from "./contexts/UploadContext";
 import { useQuery } from "./hooks/useQuery";
 
-function App() {
+function AppContent() {
   const { executeQuery, data, loading, error } = useQuery();
   const [activeTab, setActiveTab] = useState<"search" | "upload" | "graph">(
     "search",
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex flex-col font-sans text-gray-900">
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200 px-8 py-4 flex justify-between items-center shadow-md">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-lg">R</span>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 flex flex-col font-sans text-gray-900 overflow-x-hidden">
+      {/* Animated background elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 -left-4 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
+        <div className="absolute top-0 -right-4 w-72 h-72 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute -bottom-8 left-20 w-72 h-72 bg-cyan-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" style={{ animationDelay: '4s' }}></div>
+      </div>
+
+      {/* Content */}
+      <div className="relative z-10">
+        {/* Premium Header */}
+        <header className="sticky top-0 z-50 glass border-b border-white/10">
+          <div className="px-8 py-4 flex justify-between items-center">
+            {/* Logo Section */}
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl blur-lg opacity-75"></div>
+                <div className="relative w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
+                  <span className="text-white font-black text-xl">○</span>
+                </div>
+              </div>
+              <div>
+                <h1 className="text-3xl font-black tracking-tighter text-gradient">
+                  ResearchOS
+                </h1>
+                <p className="text-xs font-semibold text-cyan-300 tracking-widest uppercase">
+                  Knowledge Graph Intelligence
+                </p>
+              </div>
+            </div>
+
+            {/* Navigation */}
+            <nav className="flex gap-2 items-center">
+              {[
+                { id: "search", label: "🔍 Search", icon: "🔍" },
+                { id: "graph", label: "📊 Graph", icon: "📊" },
+                { id: "upload", label: "📤 Ingest", icon: "📤" },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as any)}
+                  className={`px-5 py-2.5 rounded-xl font-semibold transition-all duration-300 relative overflow-hidden group ${
+                    activeTab === tab.id
+                      ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/50"
+                      : "text-gray-300 hover:text-white hover:bg-white/5"
+                  }`}
+                >
+                  <span className="relative z-10">{tab.label}</span>
+                  {activeTab === tab.id && (
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 -z-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  )}
+                </button>
+              ))}
+
+              <div className="w-px h-8 bg-white/20 mx-2"></div>
+              <ClearDBButton />
+            </nav>
           </div>
-          <div>
-            <h1 className="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-blue-900 to-indigo-900 bg-clip-text text-transparent">
-              ResearchOS
-            </h1>
-            <span className="text-xs font-semibold text-indigo-600 bg-indigo-50 px-2.5 py-0.5 rounded-full">
-              Graph RAG v2.0
-            </span>
-          </div>
-        </div>
-        <nav className="flex gap-3 items-center">
-          <button
-            onClick={() => setActiveTab("search")}
-            className={`px-4 py-2.5 rounded-lg font-medium transition-all duration-200 ${activeTab === "search" ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-200" : "text-gray-600 hover:bg-gray-100"}`}
-          >
-            🔍 Search
-          </button>
-          <button
-            onClick={() => setActiveTab("graph")}
-            className={`px-4 py-2.5 rounded-lg font-medium transition-all duration-200 ${activeTab === "graph" ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-200" : "text-gray-600 hover:bg-gray-100"}`}
-          >
-            📊 Graph
-          </button>
-          <button
-            onClick={() => setActiveTab("upload")}
-            className={`px-4 py-2.5 rounded-lg font-medium transition-all duration-200 ${activeTab === "upload" ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-200" : "text-gray-600 hover:bg-gray-100"}`}
-          >
-            📤 Ingest
-          </button>
-          <div className="w-px h-6 bg-gray-200"></div>
-          <ClearDBButton />
-        </nav>
-      </header>
+        </header>
 
       <main className="flex-1 p-8 max-w-7xl mx-auto w-full">
         {activeTab === "search" && (
           <div className="flex flex-col gap-8 items-center max-w-4xl mx-auto">
-            <div className="w-full text-center mb-4">
-              <h2 className="text-4xl font-bold bg-gradient-to-r from-blue-900 to-indigo-900 bg-clip-text text-transparent mb-2">
-                Intelligent Research Search
+            {/* Hero Section */}
+            <div className="w-full text-center mb-8 space-y-3">
+              <div className="inline-block">
+                <span className="text-sm font-bold text-cyan-400 bg-cyan-400/10 px-4 py-2 rounded-full border border-cyan-400/30">
+                  ✨ Powered by Knowledge Graphs
+                </span>
+              </div>
+              <h2 className="text-5xl md:text-6xl font-black tracking-tighter">
+                <span className="text-gradient">Intelligent Research</span>
+                <br />
+                <span className="text-white">at Your Fingertips</span>
               </h2>
-              <p className="text-gray-600">
-                Ask questions about your documents, papers, and audio content
+              <p className="text-lg text-gray-400 max-w-2xl mx-auto">
+                Explore documents, audio, and papers with AI-powered insights. Ask anything, get evidence-based answers.
               </p>
             </div>
+
+            {/* Search Bar */}
             <QueryBar onSearch={(txt) => executeQuery(txt)} loading={loading} />
 
+            {/* Error State */}
             {error && (
               <div className="w-full">
-                <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
-                  <div className="flex">
-                    <div className="flex-shrink-0">
-                      <span className="text-xl">⚠️</span>
-                    </div>
-                    <div className="ml-3">
-                      <p className="text-sm text-red-700 font-medium">
-                        {error}
-                      </p>
+                <div className="glass-dark border border-red-500/30 p-4 rounded-xl">
+                  <div className="flex gap-3">
+                    <span className="text-2xl flex-shrink-0">⚠️</span>
+                    <div>
+                      <p className="text-red-300 font-semibold">Something went wrong</p>
+                      <p className="text-sm text-red-200 mt-1">{error}</p>
                     </div>
                   </div>
                 </div>
               </div>
             )}
 
+            {/* Results */}
             {data && !loading && (
               <div className="w-full">
                 <AnswerCard data={data} />
               </div>
             )}
 
+            {/* Empty State */}
             {!data && !loading && !error && (
-              <div className="w-full mt-12 text-center">
+              <div className="w-full mt-16 space-y-12">
+                <div className="text-center space-y-3">
+                  <p className="text-gray-400 text-sm uppercase tracking-widest font-semibold">Why ResearchOS?</p>
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-                    <div className="text-3xl mb-3">📚</div>
-                    <h3 className="font-semibold text-gray-900 mb-2">
-                      Upload Documents
-                    </h3>
-                    <p className="text-sm text-gray-600">
-                      Add PDFs, audio files, and papers
-                    </p>
-                  </div>
-                  <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-                    <div className="text-3xl mb-3">🔍</div>
-                    <h3 className="font-semibold text-gray-900 mb-2">
-                      Smart Search
-                    </h3>
-                    <p className="text-sm text-gray-600">
-                      Ask natural language questions
-                    </p>
-                  </div>
-                  <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-                    <div className="text-3xl mb-3">📊</div>
-                    <h3 className="font-semibold text-gray-900 mb-2">
-                      Graph Analysis
-                    </h3>
-                    <p className="text-sm text-gray-600">
-                      Visualize connections and relationships
-                    </p>
-                  </div>
+                  {[
+                    {
+                      icon: "📚",
+                      title: "Multi-Modal Knowledge",
+                      desc: "Analyze PDFs, audio transcripts, and papers simultaneously",
+                      color: "from-blue-500 to-cyan-500"
+                    },
+                    {
+                      icon: "🧠",
+                      title: "Intelligent Analysis",
+                      desc: "AI understands context and relationships across documents",
+                      color: "from-indigo-500 to-purple-500"
+                    },
+                    {
+                      icon: "⚡",
+                      title: "Real-Time Insights",
+                      desc: "Get answers with citations and visual evidence instantly",
+                      color: "from-purple-500 to-pink-500"
+                    },
+                  ].map((item, idx) => (
+                    <div
+                      key={idx}
+                      className="card-hover group relative overflow-hidden rounded-2xl p-8 glass-dark border border-white/10"
+                    >
+                      {/* Gradient Background */}
+                      <div className={`absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-300 bg-gradient-to-br ${item.color}`}></div>
+                      
+                      {/* Content */}
+                      <div className="relative z-10">
+                        <div className="text-4xl mb-4">{item.icon}</div>
+                        <h3 className="text-xl font-bold text-white mb-2">{item.title}</h3>
+                        <p className="text-gray-400 text-sm leading-relaxed">{item.desc}</p>
+                      </div>
+
+                      {/* Shine effect */}
+                      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 shimmer-animation"></div>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
@@ -136,7 +183,19 @@ function App() {
           </div>
         )}
       </main>
+      </div>
+      
+      {/* Upload Notifications - visible across all tabs */}
+      <UploadNotification />
     </div>
+  );
+}
+
+function App() {
+  return (
+    <UploadProvider>
+      <AppContent />
+    </UploadProvider>
   );
 }
 

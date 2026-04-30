@@ -17,22 +17,38 @@ def retrieve_context(query_text: str):
     if not weaviate_results:
         return [], [], {"related_papers": [], "concepts": []}
     
-    # Extract unique paper IDs
+    # Extract unique paper IDs (including audio source papers)
     paper_ids = list(set([res["paper_id"] for res in weaviate_results if res.get("paper_id")]))
     
     # 3. Neo4j Graph Traversal
     graph_context = graph_db.get_related_graph_context(paper_ids)
     
-    # 4. Cohere Rerank: Only rerank text/audio chunks. Protect figures.
-    text_results = [res for res in weaviate_results if res["modality"] != "image"]
+    # 4. Separate by modality
+    pdf_text_results = [res for res in weaviate_results if res["modality"] == "text"]
+    audio_results = [res for res in weaviate_results if res["modality"] == "audio"]
     image_results = [res for res in weaviate_results if res["modality"] == "image"]
     
-    docs_for_rerank = [res.get("chunk_text", "") for res in text_results]
+    # Rerank PDF text chunks if available
+    if pdf_text_results:
+        docs_for_rerank = [res.get("chunk_text", "") for res in pdf_text_results]
+        top_indices = reranker.rerank(query_text, docs_for_rerank, top_n=settings.COHERE_TOP_N)
+        reranked_pdf_results = [pdf_text_results[i] for i in top_indices] if top_indices else pdf_text_results
+    else:
+        reranked_pdf_results = []
     
-    top_indices = reranker.rerank(query_text, docs_for_rerank, top_n=settings.COHERE_TOP_N)
+    # If we have PDF results, use them as primary source
+    # If no PDF results, use audio results (supplementary)
+    if reranked_pdf_results:
+        reranked_results = reranked_pdf_results + audio_results
+    else:
+        # No PDF content, rerank audio instead
+        if audio_results:
+            docs_for_rerank = [res.get("chunk_text", "") for res in audio_results]
+            top_indices = reranker.rerank(query_text, docs_for_rerank, top_n=settings.COHERE_TOP_N)
+            audio_results = [audio_results[i] for i in top_indices] if top_indices else audio_results
+        reranked_results = audio_results
     
-    reranked_results = [text_results[i] for i in top_indices] if text_results else []
-    # Re-append images at the end of the ranked results
+    # Re-append images at the end
     reranked_results.extend(image_results)
     
     sources = []

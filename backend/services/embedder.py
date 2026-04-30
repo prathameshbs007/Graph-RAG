@@ -11,7 +11,7 @@ def get_text_embedding(text: Union[str, List[str]]) -> Union[list[float], List[l
                 "model": settings.EMBED_MODEL,
                 "input": text
             },
-            timeout=30.0
+            timeout=120.0  # Increased to 120 seconds for slow machines or cold starts
         )
         response.raise_for_status()
         embeds = response.json().get("embeddings", [])
