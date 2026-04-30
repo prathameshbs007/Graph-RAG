@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     COHERE_RERANK_MODEL: str = "rerank-english-v3.0"
     COHERE_TOP_N: int = 10
     CLIP_MODEL: str = "ViT-B/32"
-    WHISPER_MODEL: str = "base"
+    WHISPER_MODEL: str = "tiny"
     RETRIEVAL_TOP_K: int = 20
     CHUNK_SIZE: int = 512
     CHUNK_OVERLAP: int = 50

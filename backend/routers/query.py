@@ -2,6 +2,7 @@ from fastapi import APIRouter
 from models.query import QueryRequest, QueryResponse, SourceChunk, FigureReference, GraphContext
 from services.retriever import retrieve_context
 from services.generator import generator
+from services.processing_status import processing_tracker
 
 router = APIRouter(prefix="/query", tags=["query"])
 
@@ -17,3 +18,13 @@ async def query_endpoint(req: QueryRequest):
         figures=figures,
         graph_context=graph_data
     )
+
+@router.get("/status/{file_id}")
+async def get_processing_status(file_id: str):
+    """Get the processing status of an ingested file"""
+    return processing_tracker.get_status(file_id)
+
+@router.get("/status")
+async def get_all_processing_status():
+    """Get all processing statuses"""
+    return processing_tracker.get_all_statuses()

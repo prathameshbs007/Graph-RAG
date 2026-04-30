@@ -14,7 +14,7 @@ class AudioTranscriber:
             
     def transcribe(self, file_path: str):
         self._lazy_init()
-        segments, info = self._model.transcribe(file_path, beam_size=5)
+        segments, info = self._model.transcribe(file_path, beam_size=1)
         
         chunks_data = []
         duration = info.duration
