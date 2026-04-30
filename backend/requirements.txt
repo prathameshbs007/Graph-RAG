@@ -14,3 +14,4 @@ torch
 torchvision
 requests
 python-multipart
+pytesseract

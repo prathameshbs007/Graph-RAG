@@ -2,6 +2,7 @@ import fitz  # PyMuPDF
 from PIL import Image
 import io
 import os
+import pytesseract
 from config import settings
 
 def chunk_text(text: str, chunk_size=512, overlap=50) -> list[str]:
@@ -27,6 +28,15 @@ def extract_pdf_data(file_path: str, paper_id: str, output_dir: str):
         
         # Text extraction
         text = page.get_text("text").strip()
+        
+        # Fallback to OCR if page has no text layer (scanned document / image PDF)
+        if not text:
+            try:
+                # Require Tesseract to be installed in the Docker image
+                text = page.get_textpage_ocr(flags=0, dpi=300, full=True).extractText().strip()
+            except Exception as e:
+                print(f"OCR failed for page {page_num + 1}: {e}")
+                
         if text:
             page_chunks = chunk_text(text, settings.CHUNK_SIZE, settings.CHUNK_OVERLAP)
             for c in page_chunks:
@@ -57,6 +67,15 @@ def extract_pdf_data(file_path: str, paper_id: str, output_dir: str):
                     "page": page_num + 1,
                     "file_path": image_filepath
                 })
+                
+                # Perform secondary OCR directly on the embedded image to catch chart labels/data!
+                img_text = pytesseract.image_to_string(pil_img).strip()
+                if len(img_text) > 5:
+                    chunks_data.append({
+                        "chunk_text": f"[Data extracted from Figure {img_idx + 1}]: {img_text}",
+                        "page": page_num + 1,
+                    })
+                    
             except Exception as e:
                 print(f"Failed to process image {fig_id}: {e}")
             
