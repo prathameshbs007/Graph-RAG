@@ -59,6 +59,7 @@ class WeaviateDB:
                 vector = chunk.get("vector")
                 batch.add_data_object(
                     data_object=properties,
+                    class_name="AudioChunk",
                     vector=vector
                 )
 
