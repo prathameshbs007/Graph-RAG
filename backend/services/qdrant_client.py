@@ -117,12 +117,17 @@ class QdrantDB:
             ))
         self.client.upsert(collection_name="audio_chunks", points=points)
 
-    def search_all_classes(self, query_vector: list[float], clip_vector: Optional[list[float]] = None, limit: int = 10) -> list[dict]:
-        results = []
+    def search_all_classes(self, query_vector: list[float], clip_vector: Optional[list[float]] = None, limit: int = 10) -> tuple[list[dict], list[dict]]:
+        """Search all collections, keeping text-space (text/audio) and CLIP-space (figures)
+        results in separate lists — their scores live in different embedding spaces and are
+        not comparable, so they must never be merged into one ranked list."""
+        text_space_results = []
+        image_space_results = []
         for collection, modality in COLLECTION_MODALITY.items():
             try:
                 vec = clip_vector if collection == "figure_chunks" and clip_vector else query_vector
                 hits = self.client.query_points(collection_name=collection, query=vec, limit=limit, with_payload=True).points
+                bucket = image_space_results if collection == "figure_chunks" else text_space_results
                 for hit in hits:
                     payload = dict(hit.payload or {})
                     payload["modality"] = modality
@@ -132,14 +137,13 @@ class QdrantDB:
                         payload["paper_id"] = payload.get("source_paper_id", "")
                         payload["paper_title"] = payload.get("title", "")
                     payload["chunk_text"] = payload.get("chunk_text") or payload.get("caption", "")
-                    results.append(payload)
+                    bucket.append(payload)
             except Exception as e:
                 logger.error("Error searching %s: %s", collection, e)
 
-        # Sort the overall results for good measure, but do not truncate globally.
-        # Top-K was already applied per-collection by `limit` inside the loop!
-        results.sort(key=lambda x: x["score"], reverse=True)
-        return results
+        text_space_results.sort(key=lambda x: x["score"], reverse=True)
+        image_space_results.sort(key=lambda x: x["score"], reverse=True)
+        return text_space_results, image_space_results
 
     def get_figure_by_id(self, figure_id: str) -> Optional[dict]:
         points, _ = self.client.scroll(

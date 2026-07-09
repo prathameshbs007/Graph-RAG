@@ -12,7 +12,7 @@ router = APIRouter(prefix="/query", tags=["query"])
 @router.post("", response_model=QueryResponse)
 async def query_endpoint(req: QueryRequest):
     try:
-        sources, figures, graph_data = retrieve_context(req.text)
+        sources, figures, graph_data = retrieve_context(req.text, top_k=req.top_k, rerank_top_n=req.rerank_top_n)
     except RuntimeError as e:
         logger.error("Retrieval failed for query: %s", e)
         raise HTTPException(status_code=502, detail="Embedding service unavailable") from e

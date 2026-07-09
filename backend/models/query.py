@@ -3,7 +3,6 @@ from typing import Optional, List, Literal
 
 class QueryRequest(BaseModel):
     text: str
-    image_base64: Optional[str] = None
     top_k: int = 10
     rerank_top_n: int = 5
 
@@ -16,6 +15,8 @@ class SourceChunk(BaseModel):
     chunk_text: str
     score: float
     modality: Literal["text", "image", "audio"]
+    start_time: Optional[float] = None
+    end_time: Optional[float] = None
 
 class FigureReference(BaseModel):
     figure_id: str
