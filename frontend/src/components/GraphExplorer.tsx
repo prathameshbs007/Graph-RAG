@@ -1,20 +1,21 @@
 import { useEffect, useState } from 'react';
 import ForceGraph2D from 'react-force-graph-2d';
-import axios from 'axios';
+import { api } from '../lib/api';
+import type { GraphNode, GraphEdge } from '../types';
 
 export const GraphExplorer = () => {
-    const [graphData, setGraphData] = useState({ nodes: [], links: [] });
+    const [graphData, setGraphData] = useState<{ nodes: GraphNode[]; links: GraphEdge[] }>({ nodes: [], links: [] });
 
     useEffect(() => {
         const fetchGraph = async () => {
             try {
                 const [nodesRes, edgesRes] = await Promise.all([
-                    axios.get('http://localhost:8054/graph/nodes'),
-                    axios.get('http://localhost:8054/graph/edges')
+                    api.get<{ nodes: GraphNode[] }>('/graph/nodes'),
+                    api.get<{ edges: GraphEdge[] }>('/graph/edges'),
                 ]);
                 setGraphData({
                     nodes: nodesRes.data.nodes,
-                    links: edgesRes.data.edges
+                    links: edgesRes.data.edges,
                 });
             } catch (err) {
                 console.error("Failed to load graph", err);
@@ -23,7 +24,7 @@ export const GraphExplorer = () => {
         fetchGraph();
     }, []);
 
-    const getNodeColor = (node: any) => {
+    const getNodeColor = (node: GraphNode) => {
         switch (node.label) {
             case 'Paper': return '#a855f7';
             case 'Concept': return '#14b8a6';
@@ -43,10 +44,10 @@ export const GraphExplorer = () => {
                 </div>
             </div>
             <div className="flex-1 relative">
-                <ForceGraph2D
+                <ForceGraph2D<GraphNode, GraphEdge>
                     graphData={graphData}
-                    nodeLabel={(node: any) => `${node.label}: ${node.title || node.name || node.id}`}
-                    nodeColor={getNodeColor}
+                    nodeLabel={(node) => `${node.label}: ${node.title || node.name || node.id}`}
+                    nodeColor={(node) => getNodeColor(node)}
                     nodeRelSize={6}
                     linkColor={() => '#e5e7eb'}
                 />

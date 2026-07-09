@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { api } from '../lib/api';
+import type { IngestAcceptedResponse, IngestStatus } from '../types';
 
 export const UploadPanel = () => {
     const [file, setFile] = useState<File | null>(null);
@@ -7,17 +9,45 @@ export const UploadPanel = () => {
     const [year, setYear] = useState('');
     const [sourcePaperId, setSourcePaperId] = useState('');
     const [uploading, setUploading] = useState(false);
-    const [result, setResult] = useState<any>(null);
-    const [progress, setProgress] = useState(0);
+    const [uploadProgress, setUploadProgress] = useState(0);
+    const [status, setStatus] = useState<IngestStatus | null>(null);
+    const [error, setError] = useState<string | null>(null);
+    const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-    const isAudio = file?.type.startsWith('audio/') || file?.name.match(/\.(mp3|wav|m4a)$/i);
+    const isAudio = file?.type.startsWith('audio/') || !!file?.name.match(/\.(mp3|mp4|mpeg|mpga|m4a|wav|webm|flac|ogg)$/i);
+
+    useEffect(() => {
+        return () => {
+            if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
+        };
+    }, []);
+
+    const pollStatus = (id: string) => {
+        pollIntervalRef.current = setInterval(async () => {
+            try {
+                const res = await api.get<IngestStatus>(`/ingest/status/${id}`);
+                setStatus(res.data);
+                if (res.data.status === 'done' || res.data.status === 'error') {
+                    if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
+                    setUploading(false);
+                }
+            } catch {
+                if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
+                setUploading(false);
+                setError('Failed to check ingestion status');
+            }
+        }, 1500);
+    };
 
     const handleUpload = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!file) return;
 
         setUploading(true);
-        setProgress(10);
+        setUploadProgress(0);
+        setStatus(null);
+        setError(null);
+
         const formData = new FormData();
         formData.append('file', file);
         if (title) formData.append('title', title);
@@ -30,22 +60,19 @@ export const UploadPanel = () => {
         }
 
         try {
-            setProgress(40);
             const endpoint = isAudio ? '/ingest/audio' : '/ingest/pdf';
-            const res = await fetch(`http://localhost:8054${endpoint}`, {
-                method: 'POST',
-                body: formData
+            const res = await api.post<IngestAcceptedResponse>(endpoint, formData, {
+                onUploadProgress: (evt) => {
+                    if (evt.total) {
+                        setUploadProgress(Math.round((evt.loaded / evt.total) * 100));
+                    }
+                },
             });
-            setProgress(80);
-            const data = await res.json();
-            setResult(data);
-            setProgress(100);
-        } catch (error) {
-            console.error('Upload failed', error);
-            setResult({ error: 'Failed to upload' });
-        } finally {
+            setStatus({ status: 'processing' });
+            pollStatus(res.data.id);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to upload');
             setUploading(false);
-            setTimeout(() => setProgress(0), 2000);
         }
     };
 
@@ -96,20 +123,24 @@ export const UploadPanel = () => {
                     type="submit"
                     className="bg-blue-600 text-white font-medium p-3 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
-                    {uploading ? 'Processing...' : 'Upload & Ingest'}
+                    {uploading ? (status?.status === 'processing' ? 'Processing...' : 'Uploading...') : 'Upload & Ingest'}
                 </button>
 
-                {uploading && progress > 0 && (
+                {uploading && status?.status !== 'processing' && (
                     <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2 overflow-hidden">
-                        <div className="bg-blue-600 h-2.5 rounded-full transition-all duration-300" style={{ width: `${progress}%` }}></div>
+                        <div className="bg-blue-600 h-2.5 rounded-full transition-all duration-300" style={{ width: `${uploadProgress}%` }}></div>
                     </div>
                 )}
             </form>
 
-            {result && (
+            {error && (
+                <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">{error}</div>
+            )}
+
+            {status && (
                 <div className="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg text-sm overflow-auto max-h-64">
-                    <h3 className="font-semibold text-gray-700 mb-2">Ingestion Result</h3>
-                    <pre className="text-gray-600 whitespace-pre-wrap">{JSON.stringify(result, null, 2)}</pre>
+                    <h3 className="font-semibold text-gray-700 mb-2">Ingestion Status</h3>
+                    <pre className="text-gray-600 whitespace-pre-wrap">{JSON.stringify(status, null, 2)}</pre>
                 </div>
             )}
         </div>

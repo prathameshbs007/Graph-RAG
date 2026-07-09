@@ -1,8 +1,8 @@
-
 import { SourceChip } from './SourceChip';
 import { FigureCitation } from './FigureCitation';
+import type { QueryResponse } from '../types';
 
-export const AnswerCard = ({ data }: { data: any }) => {
+export const AnswerCard = ({ data }: { data: QueryResponse | null }) => {
     if (!data) return null;
 
     return (
@@ -16,8 +16,8 @@ export const AnswerCard = ({ data }: { data: any }) => {
                 <div>
                     <h4 className="font-semibold text-gray-600 mb-3 uppercase tracking-wider text-sm border-b pb-2">Cited Sources</h4>
                     <div className="flex flex-col gap-3">
-                        {data.sources?.map((s: any, idx: number) => (
-                            <SourceChip key={idx} index={idx + 1} source={s} />
+                        {data.sources?.map((s, idx) => (
+                            <SourceChip key={s.chunk_id || idx} index={idx + 1} source={s} />
                         ))}
                     </div>
                 </div>
@@ -26,8 +26,8 @@ export const AnswerCard = ({ data }: { data: any }) => {
                     <h4 className="font-semibold text-gray-600 mb-3 uppercase tracking-wider text-sm border-b pb-2">Visual Evidence</h4>
                     <div className="flex flex-col gap-4">
                         {data.figures?.length > 0 ? (
-                            data.figures.map((f: any, idx: number) => (
-                                <FigureCitation key={idx} figure={f} />
+                            data.figures.map((f, idx) => (
+                                <FigureCitation key={f.figure_id || idx} figure={f} />
                             ))
                         ) : (
                             <p className="text-gray-400 italic">No visual evidence retrieved for this query.</p>

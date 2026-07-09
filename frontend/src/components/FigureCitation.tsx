@@ -1,8 +1,10 @@
 import { useState } from 'react';
+import { assetUrl } from '../lib/api';
+import type { FigureReference } from '../types';
 
-export const FigureCitation = ({ figure }: { figure: any }) => {
+export const FigureCitation = ({ figure }: { figure: FigureReference }) => {
     const [isOpen, setIsOpen] = useState(false);
-    const imgUrl = `http://localhost:8054${figure.url}`;
+    const imgUrl = assetUrl(figure.url);
 
     return (
         <>

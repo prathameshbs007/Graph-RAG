@@ -1,24 +1,24 @@
 import { useState } from 'react';
-import axios from 'axios';
+import { api } from '../lib/api';
+import type { QueryResponse } from '../types';
 
 export const useQuery = () => {
     const [loading, setLoading] = useState(false);
-    const [data, setData] = useState<any>(null);
+    const [data, setData] = useState<QueryResponse | null>(null);
     const [error, setError] = useState<string | null>(null);
 
-    const executeQuery = async (text: string, imageBase64?: string | null) => {
+    const executeQuery = async (text: string) => {
         setLoading(true);
         setError(null);
         try {
-            const res = await axios.post('http://localhost:8054/query', {
+            const res = await api.post<QueryResponse>('/query', {
                 text,
-                image_base64: imageBase64,
                 top_k: 10,
-                rerank_top_n: 5
+                rerank_top_n: 5,
             });
             setData(res.data);
-        } catch (err: any) {
-            setError(err.message || 'An error occurred during query');
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'An error occurred during query');
         } finally {
             setLoading(false);
         }

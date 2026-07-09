@@ -24,6 +24,7 @@ class Settings(BaseSettings):
 
     BACKEND_PORT: int = 8000
     FIGURES_DIR: str = "/app/figures"
+    ALLOWED_ORIGINS: str = "http://localhost:3000"
 
     class Config:
         env_file = ".env"
