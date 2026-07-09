@@ -23,31 +23,72 @@ class Neo4jDB:
         with self.driver.session() as session:
             session.run(query, paper_id=paper_id, title=title, year=year, authors=authors)
 
+    def add_concepts(self, paper_id: str, concepts: list[str]) -> int:
+        if not concepts:
+            return 0
+        query = """
+        MATCH (p:Paper {id: $paper_id})
+        UNWIND $concepts AS concept_name
+        MERGE (c:Concept {id: toLower(concept_name)})
+        SET c.name = concept_name
+        MERGE (p)-[:HAS_CONCEPT]->(c)
+        RETURN count(DISTINCT c) AS n
+        """
+        with self.driver.session() as session:
+            record = session.run(query, paper_id=paper_id, concepts=concepts).single()
+            return record["n"] if record else 0
+
+    def add_citations(self, paper_id: str, cited_titles: list[str]) -> int:
+        if not cited_titles:
+            return 0
+        query = """
+        MATCH (p:Paper {id: $paper_id})
+        UNWIND $cited_titles AS cited_title
+        MATCH (other:Paper)
+        WHERE other.id <> $paper_id AND toLower(other.title) CONTAINS toLower(cited_title)
+        MERGE (p)-[:CITES]->(other)
+        RETURN count(DISTINCT other) AS n
+        """
+        with self.driver.session() as session:
+            record = session.run(query, paper_id=paper_id, cited_titles=cited_titles).single()
+            return record["n"] if record else 0
+
     def get_related_graph_context(self, paper_ids: list[str]) -> dict:
         if not paper_ids:
             return {"related_papers": [], "concepts": []}
-            
+
         related_papers = set()
         concepts = set()
-        
-        query = """
-        MATCH (p:Paper)
+
+        citation_query = """
+        MATCH (p:Paper)-[:CITES]-(other:Paper)
         WHERE p.id IN $paper_ids
-        OPTIONAL MATCH (p)-[:CITES]-(related:Paper)
-        OPTIONAL MATCH (p)-[:HAS_CONCEPT]->(c:Concept)
-        RETURN related.id AS related_id, c.name AS concept_name
+        RETURN DISTINCT other.title AS title
+        """
+        concept_query = """
+        MATCH (p:Paper)-[:HAS_CONCEPT]->(c:Concept)
+        WHERE p.id IN $paper_ids
+        RETURN DISTINCT c.name AS name
+        """
+        shared_concept_query = """
+        MATCH (p:Paper)-[:HAS_CONCEPT]->(:Concept)<-[:HAS_CONCEPT]-(other:Paper)
+        WHERE p.id IN $paper_ids AND NOT other.id IN $paper_ids
+        RETURN DISTINCT other.title AS title
         """
         try:
             with self.driver.session() as session:
-                result = session.run(query, paper_ids=paper_ids)
-                for record in result:
-                    r_id = record["related_id"]
-                    c_name = record["concept_name"]
-                    if r_id: related_papers.add(r_id)
-                    if c_name: concepts.add(c_name)
+                for record in session.run(citation_query, paper_ids=paper_ids):
+                    if record["title"]:
+                        related_papers.add(record["title"])
+                for record in session.run(concept_query, paper_ids=paper_ids):
+                    if record["name"]:
+                        concepts.add(record["name"])
+                for record in session.run(shared_concept_query, paper_ids=paper_ids):
+                    if record["title"]:
+                        related_papers.add(record["title"])
         except Exception as e:
             logger.error("Graph traversal error: %s", e)
-            
+
         return {
             "related_papers": list(related_papers),
             "concepts": list(concepts)

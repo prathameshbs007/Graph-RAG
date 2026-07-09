@@ -8,6 +8,7 @@ from config import settings
 from models.ingest import IngestAudioResponse, IngestPDFResponse
 from services.audio_transcriber import transcriber
 from services.clip_embedder import clip_embedder
+from services.concept_extractor import extract_concepts
 from services.embedder import get_text_embedding
 from services.neo4j_client import graph_db
 from services.pdf_extractor import extract_pdf_data
@@ -87,11 +88,16 @@ async def ingest_pdf(
             logger.error("Failed to persist PDF ingestion for paper_id=%s: %s", paper_id, e)
             raise HTTPException(status_code=502, detail="Failed to store ingested data") from e
 
+        lead_text = "\n\n".join(c["chunk_text"] for c in chunks_data if c.get("page", 0) <= 3)
+        concept_data = extract_concepts(lead_text)
+        concepts_linked = graph_db.add_concepts(paper_id, concept_data["concepts"])
+        citations_linked = graph_db.add_citations(paper_id, concept_data["cited_titles"])
+
         return IngestPDFResponse(
             paper_id=paper_id,
             chunks_created=len(chunks_data),
             figures_extracted=len(figures_data),
-            graph_nodes_created=1 + len(author_list),
+            graph_nodes_created=1 + len(author_list) + concepts_linked + citations_linked,
             status="success"
         )
     finally:
