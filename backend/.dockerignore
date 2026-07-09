@@ -5,3 +5,7 @@ venv
 .git
 .env
 *.log
+tests/
+conftest.py
+requirements-dev.txt
+.pytest_cache

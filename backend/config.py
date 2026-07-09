@@ -1,9 +1,11 @@
 from typing import Optional
 
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=".env")
+
     GROQ_API_KEY: str
     NEO4J_PASSWORD: str
 
@@ -25,9 +27,6 @@ class Settings(BaseSettings):
     BACKEND_PORT: int = 8000
     FIGURES_DIR: str = "/app/figures"
     ALLOWED_ORIGINS: str = "http://localhost:3000"
-
-    class Config:
-        env_file = ".env"
 
 
 settings = Settings()

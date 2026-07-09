@@ -1,7 +1,9 @@
 import sys
+
 sys.path.append("/app")
-from config import settings
 from neo4j import GraphDatabase
+
+from config import settings
 from services.qdrant_client import db as qdrant_db
 
 if "--yes" not in sys.argv:

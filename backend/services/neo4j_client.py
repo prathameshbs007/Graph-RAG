@@ -1,6 +1,7 @@
 import logging
 
 from neo4j import GraphDatabase
+
 from config import settings
 
 logger = logging.getLogger(__name__)

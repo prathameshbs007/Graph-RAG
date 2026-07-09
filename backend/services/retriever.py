@@ -1,11 +1,12 @@
 from typing import Optional
 
-from services.qdrant_client import db
-from services.neo4j_client import graph_db
-from services.embedder import get_text_embedding
-from services.reranker import reranker
 from config import settings
 from services.clip_embedder import clip_embedder
+from services.embedder import get_text_embedding
+from services.neo4j_client import graph_db
+from services.qdrant_client import db
+from services.reranker import reranker
+
 
 def retrieve_context(query_text: str, top_k: Optional[int] = None, rerank_top_n: Optional[int] = None):
     top_k = top_k if top_k is not None else settings.RETRIEVAL_TOP_K

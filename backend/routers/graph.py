@@ -1,5 +1,7 @@
-from fastapi import APIRouter, HTTPException, Query
 from typing import Optional
+
+from fastapi import APIRouter, HTTPException, Query
+
 from services.neo4j_client import graph_db
 
 router = APIRouter(prefix="/graph", tags=["graph"])

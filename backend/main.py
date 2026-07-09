@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, Response
 
 from config import settings
-from routers import ingest, query, graph
+from routers import graph, ingest, query
 from services.neo4j_client import graph_db
 from services.qdrant_client import db as qdrant_db
 

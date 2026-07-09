@@ -2,7 +2,7 @@ import logging
 import os
 import uuid
 
-from fastapi import APIRouter, BackgroundTasks, UploadFile, File, Form, HTTPException
+from fastapi import APIRouter, BackgroundTasks, File, Form, HTTPException, UploadFile
 
 from config import settings
 from models.ingest import IngestAcceptedResponse

@@ -1,9 +1,10 @@
 import logging
 
 from fastapi import APIRouter, HTTPException
-from models.query import QueryRequest, QueryResponse, SourceChunk, FigureReference, GraphContext
-from services.retriever import retrieve_context
+
+from models.query import QueryRequest, QueryResponse
 from services.generator import generator
+from services.retriever import retrieve_context
 
 logger = logging.getLogger(__name__)
 
