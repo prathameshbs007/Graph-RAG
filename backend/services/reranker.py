@@ -1,33 +1,37 @@
 import logging
+from typing import Optional
 
-import cohere
+from fastembed.rerank.cross_encoder import TextCrossEncoder
+
 from config import settings
 
 logger = logging.getLogger(__name__)
 
+FASTEMBED_CACHE_DIR = "/app/.fastembed_cache"
+RERANK_MODEL_NAME = "Xenova/ms-marco-MiniLM-L-6-v2"
+
 
 class Reranker:
     def __init__(self):
-        self.api_key = settings.COHERE_API_KEY
-        if self.api_key and self.api_key != "your_cohere_api_key_here":
-            self.client = cohere.Client(self.api_key)
-        else:
-            self.client = None
+        self._model = None
 
-    def rerank(self, query: str, documents: list[str], top_n: int = 5) -> list[int]:
-        if not self.client or not documents:
-            return list(range(min(len(documents), top_n)))
-            
+    def _lazy_init(self):
+        if self._model is None:
+            logger.info("Loading fastembed cross-encoder reranker %s...", RERANK_MODEL_NAME)
+            self._model = TextCrossEncoder(model_name=RERANK_MODEL_NAME, cache_dir=FASTEMBED_CACHE_DIR)
+
+    def rerank(self, query: str, documents: list[str], top_n: Optional[int] = None) -> list[int]:
+        top_n = top_n if top_n is not None else settings.RERANK_TOP_N
+        if not documents:
+            return []
         try:
-            response = self.client.rerank(
-                model=settings.COHERE_RERANK_MODEL,
-                query=query,
-                documents=documents,
-                top_n=top_n
-            )
-            return [result.index for result in response.results]
+            self._lazy_init()
+            scores = list(self._model.rerank(query, documents))
+            ranked = sorted(range(len(scores)), key=lambda i: scores[i], reverse=True)
+            return ranked[:top_n]
         except Exception as e:
-            logger.error("Cohere rerank error: %s", e)
+            logger.error("Reranker error: %s", e)
             return list(range(min(len(documents), top_n)))
+
 
 reranker = Reranker()

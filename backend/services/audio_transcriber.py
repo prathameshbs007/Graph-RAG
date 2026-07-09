@@ -1,7 +1,8 @@
 import logging
-
-from faster_whisper import WhisperModel
 import os
+
+from groq import Groq
+
 from config import settings
 
 logger = logging.getLogger(__name__)
@@ -9,30 +10,35 @@ logger = logging.getLogger(__name__)
 
 class AudioTranscriber:
     def __init__(self):
-        self.model_size = settings.WHISPER_MODEL
-        self._model = None
+        self._client = None
 
     def _lazy_init(self):
-        if self._model is None:
-            logger.info("Downloading/Loading Whisper model...")
-            self._model = WhisperModel(self.model_size, device="cpu", compute_type="int8")
-            
+        if self._client is None:
+            self._client = Groq(api_key=settings.GROQ_API_KEY)
+
     def transcribe(self, file_path: str):
         self._lazy_init()
-        segments, info = self._model.transcribe(file_path, beam_size=5)
-        
+        with open(file_path, "rb") as f:
+            transcription = self._client.audio.transcriptions.create(
+                file=(os.path.basename(file_path), f.read()),
+                model=settings.GROQ_WHISPER_MODEL,
+                response_format="verbose_json",
+            )
+
         chunks_data = []
-        duration = info.duration
-        
+        segments = getattr(transcription, "segments", None) or []
         for segment in segments:
-            text = segment.text.strip()
+            seg = segment if isinstance(segment, dict) else segment.model_dump()
+            text = (seg.get("text") or "").strip()
             if text:
                 chunks_data.append({
                     "chunk_text": text,
-                    "start_time": segment.start,
-                    "end_time": segment.end
+                    "start_time": seg.get("start"),
+                    "end_time": seg.get("end"),
                 })
 
+        duration = float(getattr(transcription, "duration", None) or 0.0)
         return chunks_data, duration, len(chunks_data)
+
 
 transcriber = AudioTranscriber()

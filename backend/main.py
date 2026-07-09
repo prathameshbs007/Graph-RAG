@@ -1,14 +1,15 @@
+import base64
 import logging
+import os
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from config import settings
-import weaviate
+from fastapi.responses import FileResponse, Response
 from neo4j import GraphDatabase
 
+from config import settings
 from routers import ingest, query, graph
-from fastapi.staticfiles import StaticFiles
-import os
+from services.qdrant_client import db as qdrant_db
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 logger = logging.getLogger(__name__)
@@ -19,9 +20,7 @@ app.include_router(ingest.router)
 app.include_router(query.router)
 app.include_router(graph.router)
 
-# Mount figures directory
 os.makedirs(settings.FIGURES_DIR, exist_ok=True)
-app.mount("/figures", StaticFiles(directory=settings.FIGURES_DIR), name="figures")
 
 app.add_middleware(
     CORSMiddleware,
@@ -31,50 +30,23 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-def init_weaviate():
-    client = weaviate.Client(url=settings.WEAVIATE_URL)
-    classes = [
-        {
-            "class": "TextChunk",
-            "vectorizer": "none",
-            "properties": [
-                {"name": "paper_id", "dataType": ["text"]},
-                {"name": "paper_title", "dataType": ["text"]},
-                {"name": "authors", "dataType": ["text[]"]},
-                {"name": "year", "dataType": ["int"]},
-                {"name": "chunk_text", "dataType": ["text"]},
-                {"name": "chunk_index", "dataType": ["int"]},
-                {"name": "page", "dataType": ["int"]},
-            ]
-        },
-        {
-            "class": "FigureChunk",
-            "vectorizer": "none",
-            "properties": [
-                {"name": "paper_id", "dataType": ["text"]},
-                {"name": "paper_title", "dataType": ["text"]},
-                {"name": "figure_id", "dataType": ["text"]},
-                {"name": "caption", "dataType": ["text"]},
-                {"name": "page", "dataType": ["int"]},
-                {"name": "file_path", "dataType": ["text"]},
-            ]
-        },
-        {
-            "class": "AudioChunk",
-            "vectorizer": "none",
-            "properties": [
-                {"name": "audio_id", "dataType": ["text"]},
-                {"name": "title", "dataType": ["text"]},
-                {"name": "chunk_text", "dataType": ["text"]},
-                {"name": "start_time", "dataType": ["number"]},
-                {"name": "end_time", "dataType": ["number"]},
-                {"name": "source_paper_id", "dataType": ["text"]},
-            ]
-        }
-    ]
-    for cls in classes:
-        if not client.schema.exists(cls["class"]):
-            client.schema.create_class(cls)
+
+@app.get("/figures/{figure_id}")
+def get_figure(figure_id: str):
+    file_path = os.path.join(settings.FIGURES_DIR, f"{figure_id}.jpg")
+    if os.path.exists(file_path):
+        return FileResponse(file_path, media_type="image/jpeg")
+
+    payload = qdrant_db.get_figure_by_id(figure_id)
+    if payload and payload.get("image_base64"):
+        image_bytes = base64.b64decode(payload["image_base64"])
+        return Response(content=image_bytes, media_type="image/jpeg")
+
+    raise HTTPException(status_code=404, detail="Figure not found")
+
+
+def init_qdrant():
+    qdrant_db.init_collections()
 
 def init_neo4j():
     driver = GraphDatabase.driver(settings.NEO4J_URI, auth=(settings.NEO4J_USER, settings.NEO4J_PASSWORD))
@@ -89,9 +61,9 @@ def init_neo4j():
 @app.on_event("startup")
 def startup_event():
     try:
-        init_weaviate()
+        init_qdrant()
     except Exception as e:
-        logger.error("Failed to init Weaviate schema: %s", e)
+        logger.error("Failed to init Qdrant collections: %s", e)
     try:
         init_neo4j()
     except Exception as e:

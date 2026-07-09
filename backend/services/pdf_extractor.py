@@ -1,3 +1,4 @@
+import base64
 import fitz  # PyMuPDF
 from PIL import Image
 import io
@@ -7,6 +8,22 @@ import pytesseract
 from config import settings
 
 logger = logging.getLogger(__name__)
+
+MAX_FIGURE_BASE64_BYTES = 200 * 1024
+
+
+def _encode_figure_base64(pil_img: Image.Image, max_bytes: int = MAX_FIGURE_BASE64_BYTES) -> str:
+    """JPEG-encode a downscaled copy of the figure as base64, staying under max_bytes."""
+    thumb = pil_img.copy()
+    thumb.thumbnail((800, 800))
+    quality = 85
+    while True:
+        buf = io.BytesIO()
+        thumb.save(buf, format="JPEG", quality=quality)
+        data = buf.getvalue()
+        if len(data) <= max_bytes or quality <= 30:
+            return base64.b64encode(data).decode("utf-8")
+        quality -= 15
 
 def chunk_text(text: str, chunk_size=512, overlap=50) -> list[str]:
     words = text.split()
@@ -68,7 +85,8 @@ def extract_pdf_data(file_path: str, paper_id: str, output_dir: str):
                     "figure_id": fig_id,
                     "caption": f"Figure {img_idx + 1} on page {page_num + 1}",
                     "page": page_num + 1,
-                    "file_path": image_filepath
+                    "file_path": image_filepath,
+                    "image_base64": _encode_figure_base64(pil_img),
                 })
                 
                 # Perform secondary OCR directly on the embedded image to catch chart labels/data!

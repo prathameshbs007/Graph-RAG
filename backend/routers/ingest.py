@@ -11,7 +11,7 @@ from services.clip_embedder import clip_embedder
 from services.embedder import get_text_embedding
 from services.neo4j_client import graph_db
 from services.pdf_extractor import extract_pdf_data
-from services.weaviate_client import db
+from services.qdrant_client import db
 
 logger = logging.getLogger(__name__)
 
