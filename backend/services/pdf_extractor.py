@@ -1,9 +1,12 @@
 import fitz  # PyMuPDF
 from PIL import Image
 import io
+import logging
 import os
 import pytesseract
 from config import settings
+
+logger = logging.getLogger(__name__)
 
 def chunk_text(text: str, chunk_size=512, overlap=50) -> list[str]:
     words = text.split()
@@ -35,7 +38,7 @@ def extract_pdf_data(file_path: str, paper_id: str, output_dir: str):
                 # Require Tesseract to be installed in the Docker image
                 text = page.get_textpage_ocr(flags=0, dpi=300, full=True).extractText().strip()
             except Exception as e:
-                print(f"OCR failed for page {page_num + 1}: {e}")
+                logger.error("OCR failed for page %d: %s", page_num + 1, e)
                 
         if text:
             page_chunks = chunk_text(text, settings.CHUNK_SIZE, settings.CHUNK_OVERLAP)
@@ -77,7 +80,7 @@ def extract_pdf_data(file_path: str, paper_id: str, output_dir: str):
                     })
                     
             except Exception as e:
-                print(f"Failed to process image {fig_id}: {e}")
+                logger.error("Failed to process image %s: %s", fig_id, e)
             
     doc.close()
     

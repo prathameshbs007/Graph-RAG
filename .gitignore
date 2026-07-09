@@ -4,12 +4,8 @@
 !.env.example
 
 # Logs and Data
+logs/
 *.log
-*.txt
-*.pdf
-*.zip
-*.tar.gz
-*.rar
 data/
 figures_data/
 

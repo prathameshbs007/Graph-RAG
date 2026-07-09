@@ -1,5 +1,10 @@
+import logging
+
 from groq import Groq
 from config import settings
+
+logger = logging.getLogger(__name__)
+
 
 class Generator:
     def __init__(self):
@@ -41,7 +46,7 @@ class Generator:
             )
             return chat_completion.choices[0].message.content
         except Exception as e:
-            print(f"Groq API error: {e}")
+            logger.error("Groq API error: %s", e)
             return "Sorry, I could not generate an answer right now due to an LLM API error."
 
 generator = Generator()

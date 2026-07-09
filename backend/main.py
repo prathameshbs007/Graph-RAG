@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from config import settings
@@ -7,6 +9,9 @@ from neo4j import GraphDatabase
 from routers import ingest, query, graph
 from fastapi.staticfiles import StaticFiles
 import os
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
+logger = logging.getLogger(__name__)
 
 app = FastAPI(title="ResearchOS")
 
@@ -86,11 +91,11 @@ def startup_event():
     try:
         init_weaviate()
     except Exception as e:
-        print(f"Failed to init Weaviate schema: {e}")
+        logger.error("Failed to init Weaviate schema: %s", e)
     try:
         init_neo4j()
     except Exception as e:
-        print(f"Failed to init Neo4j schema: {e}")
+        logger.error("Failed to init Neo4j schema: %s", e)
 
 @app.get("/health")
 def health_check():

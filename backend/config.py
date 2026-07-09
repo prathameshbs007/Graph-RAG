@@ -1,12 +1,12 @@
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
-    GROQ_API_KEY: str = "your_groq_api_key_here"
+    GROQ_API_KEY: str
     COHERE_API_KEY: str = "your_cohere_api_key_here"
     WEAVIATE_URL: str = "http://weaviate:8080"
     NEO4J_URI: str = "bolt://neo4j:7687"
     NEO4J_USER: str = "neo4j"
-    NEO4J_PASSWORD: str = "researchos123"
+    NEO4J_PASSWORD: str
     OLLAMA_URL: str = "http://ollama:11434"
     EMBED_MODEL: str = "nomic-embed-text"
     GROQ_MODEL: str = "llama-3.3-70b-versatile"

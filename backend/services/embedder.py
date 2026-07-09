@@ -1,9 +1,14 @@
-import requests
-from config import settings
+import logging
 from typing import Union, List
 
+import requests
+from config import settings
+
+logger = logging.getLogger(__name__)
+
+
 def get_text_embedding(text: Union[str, List[str]]) -> Union[list[float], List[list[float]]]:
-    """Get embedding from local Ollama instance (supports single string or list of strings)"""
+    """Get embedding(s) from local Ollama instance. Raises RuntimeError on failure."""
     try:
         response = requests.post(
             f"{settings.OLLAMA_URL}/api/embed",
@@ -15,10 +20,15 @@ def get_text_embedding(text: Union[str, List[str]]) -> Union[list[float], List[l
         )
         response.raise_for_status()
         embeds = response.json().get("embeddings", [])
-        
-        if isinstance(text, str):
-            return embeds[0] if embeds else []
-        return embeds
     except Exception as e:
-        print(f"Failed to get embedding: {e}")
-        return [] if isinstance(text, str) else [[] for _ in text]
+        logger.error("Failed to get embedding from Ollama: %s", e)
+        raise RuntimeError("Embedding request failed") from e
+
+    if isinstance(text, str):
+        if not embeds:
+            raise RuntimeError("Ollama returned no embedding")
+        return embeds[0]
+
+    if len(embeds) != len(text):
+        raise RuntimeError("Ollama returned mismatched number of embeddings")
+    return embeds

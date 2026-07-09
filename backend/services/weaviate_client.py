@@ -1,5 +1,10 @@
+import logging
+
 import weaviate
 from config import settings
+
+logger = logging.getLogger(__name__)
+
 
 class WeaviateDB:
     def __init__(self):
@@ -98,7 +103,7 @@ class WeaviateDB:
                         item_copy["chunk_id"] = "chunk_" + str(hash(item_copy["chunk_text"]))
                         results.append(item_copy)
             except Exception as e:
-                print(f"Error searching {cls}: {e}")
+                logger.error("Error searching %s: %s", cls, e)
         
         # Sort the overall results for good measure, but do not truncate globally.
         # Top-K was already applied per-class by .with_limit(limit) inside the loop! 

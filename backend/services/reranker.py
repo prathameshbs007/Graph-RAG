@@ -1,5 +1,10 @@
+import logging
+
 import cohere
 from config import settings
+
+logger = logging.getLogger(__name__)
+
 
 class Reranker:
     def __init__(self):
@@ -22,7 +27,7 @@ class Reranker:
             )
             return [result.index for result in response.results]
         except Exception as e:
-            print(f"Cohere rerank error: {e}")
+            logger.error("Cohere rerank error: %s", e)
             return list(range(min(len(documents), top_n)))
 
 reranker = Reranker()

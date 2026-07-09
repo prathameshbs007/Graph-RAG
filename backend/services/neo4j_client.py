@@ -1,5 +1,10 @@
+import logging
+
 from neo4j import GraphDatabase
 from config import settings
+
+logger = logging.getLogger(__name__)
+
 
 class Neo4jDB:
     def __init__(self):
@@ -41,7 +46,7 @@ class Neo4jDB:
                     if r_id: related_papers.add(r_id)
                     if c_name: concepts.add(c_name)
         except Exception as e:
-            print(f"Graph traversal error: {e}")
+            logger.error("Graph traversal error: %s", e)
             
         return {
             "related_papers": list(related_papers),
