@@ -18,4 +18,6 @@ RUN useradd --create-home --uid 1000 appuser \
     && chown -R appuser:appuser /app
 USER appuser
 EXPOSE 8000
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# HF Spaces (Docker SDK) sets PORT=7860 and expects the app to listen on it;
+# local docker-compose leaves PORT unset, so this defaults to 8000.
+CMD uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}

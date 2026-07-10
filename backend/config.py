@@ -24,7 +24,6 @@ class Settings(BaseSettings):
     CHUNK_SIZE: int = 512
     CHUNK_OVERLAP: int = 50
 
-    BACKEND_PORT: int = 8000
     FIGURES_DIR: str = "/app/figures"
     ALLOWED_ORIGINS: str = "http://localhost:3000"
 
