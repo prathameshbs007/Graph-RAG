@@ -21,6 +21,7 @@ COLLECTIONS = {
     "text_chunks": 384,
     "figure_chunks": 512,
     "audio_chunks": 384,
+    "concepts": 384,
 }
 
 COLLECTION_MODALITY = {
@@ -42,11 +43,12 @@ class QdrantDB:
                     collection_name=name,
                     vectors_config=VectorParams(size=size, distance=Distance.COSINE),
                 )
-                self.client.create_payload_index(
-                    collection_name=name,
-                    field_name="paper_id",
-                    field_schema=PayloadSchemaType.KEYWORD,
-                )
+                if name != "concepts":
+                    self.client.create_payload_index(
+                        collection_name=name,
+                        field_name="paper_id",
+                        field_schema=PayloadSchemaType.KEYWORD,
+                    )
                 if name == "figure_chunks":
                     self.client.create_payload_index(
                         collection_name=name,
@@ -144,6 +146,21 @@ class QdrantDB:
         text_space_results.sort(key=lambda x: x["score"], reverse=True)
         image_space_results.sort(key=lambda x: x["score"], reverse=True)
         return text_space_results, image_space_results
+
+    def find_top_concept_match(self, vector: list[float]) -> Optional[tuple[str, float]]:
+        """Return (name, cosine_score) of the single nearest existing concept, or None
+        if the concepts collection is empty. Does not apply any threshold — callers
+        decide what score (and what other evidence, e.g. lexical overlap) counts as
+        a match."""
+        hits = self.client.query_points(collection_name="concepts", query=vector, limit=1, with_payload=True).points
+        if not hits:
+            return None
+        return hits[0].payload.get("name"), hits[0].score
+
+    def upsert_concept(self, name: str, vector: list[float]):
+        self.client.upsert(collection_name="concepts", points=[
+            PointStruct(id=str(uuid.uuid4()), vector=vector, payload={"name": name}),
+        ])
 
     def get_figure_by_id(self, figure_id: str) -> Optional[dict]:
         points, _ = self.client.scroll(

@@ -9,6 +9,7 @@ from models.ingest import IngestAcceptedResponse
 from services.audio_transcriber import transcriber
 from services.clip_embedder import clip_embedder
 from services.concept_extractor import extract_concepts
+from services.concept_resolver import resolve_concepts
 from services.embedder import get_text_embedding
 from services.neo4j_client import graph_db
 from services.pdf_extractor import extract_pdf_data
@@ -69,7 +70,8 @@ def _process_pdf(paper_id: str, pdf_path: str, paper_title: str, author_list: li
 
         lead_text = "\n\n".join(c["chunk_text"] for c in chunks_data if c.get("page", 0) <= 3)
         concept_data = extract_concepts(lead_text)
-        concepts_linked = graph_db.add_concepts(paper_id, concept_data["concepts"])
+        canonical_concepts = resolve_concepts(concept_data["concepts"])
+        concepts_linked = graph_db.add_concepts(paper_id, canonical_concepts)
         citations_linked = graph_db.add_citations(paper_id, concept_data["cited_titles"])
 
         _ingest_status[paper_id] = {
