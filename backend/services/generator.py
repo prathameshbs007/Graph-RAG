@@ -1,6 +1,7 @@
 import logging
 
 from groq import Groq
+
 from config import settings
 
 logger = logging.getLogger(__name__)
@@ -17,24 +18,24 @@ class Generator:
     def generate_answer(self, query: str, sources: list[dict], graph_context: dict) -> str:
         if not self.client:
             return "Please configure the Groq API key to generate an answer. (Retrieved context will still show below)."
-            
+
         context_parts = []
         for i, s in enumerate(sources):
             context_parts.append(f"[{i+1}] Paper: {s.get('paper_title')} ({s.get('paper_id')})\nContent: {s.get('chunk_text')}")
-            
+
         context_str = "\n\n".join(context_parts)
-        
+
         graph_str = f"Related Papers: {', '.join(graph_context.get('related_papers', []))}\nConcepts: {', '.join(graph_context.get('concepts', []))}"
-        
+
         system_prompt = (
             "You are ResearchOS, an AI assistant analyzing academic papers.\n"
             "Answer the user's query based ONLY on the provided context.\n"
             "CRITICAL: Cite your sources frequently using the [chunk_id] or (paper_id).\n"
             "If the context does not contain the answer, say 'I don't have enough information'."
         )
-        
+
         user_prompt = f"Context:\n{context_str}\n\nGraph Context:\n{graph_str}\n\nQuery:\n{query}"
-        
+
         try:
             chat_completion = self.client.chat.completions.create(
                 messages=[

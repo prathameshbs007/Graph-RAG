@@ -3,6 +3,7 @@ import os
 import uuid
 
 from fastapi import APIRouter, BackgroundTasks, File, Form, HTTPException, UploadFile
+from qdrant_client.models import SparseVector
 
 from config import settings
 from models.ingest import IngestAcceptedResponse
@@ -14,6 +15,7 @@ from services.embedder import get_text_embedding
 from services.neo4j_client import graph_db
 from services.pdf_extractor import extract_pdf_data
 from services.qdrant_client import db
+from services.sparse_embedder import get_sparse_embedding
 
 logger = logging.getLogger(__name__)
 
@@ -25,6 +27,19 @@ ALLOWED_AUDIO_EXTENSIONS = {".mp3", ".mp4", ".mpeg", ".mpga", ".m4a", ".wav", ".
 
 # In-memory ingestion status store: id -> status dict. Fine for a single-process deployment.
 _ingest_status: dict[str, dict] = {}
+
+
+def _sparse_vectors_for(texts: list[str]) -> list[SparseVector | None]:
+    """BM25 sparse vectors for hybrid search, one per text. Returns all-None on
+    failure or when HYBRID_SEARCH is off, so ingestion still succeeds dense-only."""
+    if not settings.HYBRID_SEARCH:
+        return [None] * len(texts)
+    try:
+        sparse_embeddings = get_sparse_embedding(texts)
+        return [SparseVector(indices=se.indices.tolist(), values=se.values.tolist()) for se in sparse_embeddings]
+    except Exception as e:
+        logger.error("Sparse embedding failed, falling back to dense-only: %s", e)
+        return [None] * len(texts)
 
 
 async def _read_upload_within_limit(file: UploadFile) -> bytes:
@@ -52,12 +67,14 @@ def _process_pdf(paper_id: str, pdf_path: str, paper_title: str, author_list: li
         if chunks_data:
             texts = [chunk["chunk_text"] for chunk in chunks_data]
             embeddings = get_text_embedding(texts)
+            sparse_vectors = _sparse_vectors_for(texts)
             for i, chunk in enumerate(chunks_data):
                 chunk["paper_id"] = paper_id
                 chunk["paper_title"] = paper_title
                 chunk["authors"] = author_list
                 chunk["year"] = paper_year
                 chunk["vector"] = embeddings[i]
+                chunk["sparse_vector"] = sparse_vectors[i]
 
         for fig in figures_data:
             fig["paper_id"] = paper_id
@@ -123,11 +140,13 @@ def _process_audio(audio_id: str, audio_path: str, audio_title: str, source_pape
         if chunks_data:
             texts = [chunk["chunk_text"] for chunk in chunks_data]
             embeddings = get_text_embedding(texts)
+            sparse_vectors = _sparse_vectors_for(texts)
             for i, chunk in enumerate(chunks_data):
                 chunk["audio_id"] = audio_id
                 chunk["title"] = audio_title
                 chunk["source_paper_id"] = source_paper_id
                 chunk["vector"] = embeddings[i]
+                chunk["sparse_vector"] = sparse_vectors[i]
 
         db.insert_audio_chunks(chunks_data)
 

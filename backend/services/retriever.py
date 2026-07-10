@@ -1,4 +1,7 @@
+import logging
 from typing import Optional
+
+from qdrant_client.models import SparseVector
 
 from config import settings
 from services.clip_embedder import clip_embedder
@@ -6,6 +9,20 @@ from services.embedder import get_text_embedding
 from services.neo4j_client import graph_db
 from services.qdrant_client import db
 from services.reranker import reranker
+from services.sparse_embedder import get_sparse_embedding
+
+logger = logging.getLogger(__name__)
+
+
+def _sparse_query_vector(query_text: str) -> Optional[SparseVector]:
+    if not settings.HYBRID_SEARCH:
+        return None
+    try:
+        se = get_sparse_embedding(query_text)
+        return SparseVector(indices=se.indices.tolist(), values=se.values.tolist())
+    except Exception as e:
+        logger.error("Sparse query embedding failed, falling back to dense-only search: %s", e)
+        return None
 
 
 def retrieve_context(query_text: str, top_k: Optional[int] = None, rerank_top_n: Optional[int] = None):
@@ -15,9 +32,12 @@ def retrieve_context(query_text: str, top_k: Optional[int] = None, rerank_top_n:
     # 1. Embed Query
     query_vector = get_text_embedding(query_text)
     clip_vector = clip_embedder.get_text_embedding_for_clip(query_text)
+    sparse_query = _sparse_query_vector(query_text)
 
     # 2. Qdrant Top-K, kept as separate text-space and CLIP-space result sets
-    text_results, image_results = db.search_all_classes(query_vector, clip_vector=clip_vector, limit=top_k)
+    text_results, image_results = db.search_all_classes(
+        query_vector, clip_vector=clip_vector, sparse_query=sparse_query, limit=top_k
+    )
 
     if not text_results and not image_results:
         return [], [], {"related_papers": [], "concepts": []}

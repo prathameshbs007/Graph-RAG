@@ -13,6 +13,7 @@ RUN python -c "from fastembed import TextEmbedding; TextEmbedding(model_name='BA
 RUN python -c "from fastembed import TextEmbedding; TextEmbedding(model_name='Qdrant/clip-ViT-B-32-text', cache_dir='${FASTEMBED_CACHE}')"
 RUN python -c "from fastembed import ImageEmbedding; ImageEmbedding(model_name='Qdrant/clip-ViT-B-32-vision', cache_dir='${FASTEMBED_CACHE}')"
 RUN python -c "from fastembed.rerank.cross_encoder import TextCrossEncoder; TextCrossEncoder(model_name='Xenova/ms-marco-MiniLM-L-6-v2', cache_dir='${FASTEMBED_CACHE}')"
+RUN python -c "from fastembed import SparseTextEmbedding; SparseTextEmbedding(model_name='Qdrant/bm25', cache_dir='${FASTEMBED_CACHE}')"
 RUN useradd --create-home --uid 1000 appuser \
     && mkdir -p /app/figures \
     && chown -R appuser:appuser /app

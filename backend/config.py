@@ -23,6 +23,7 @@ class Settings(BaseSettings):
     RETRIEVAL_TOP_K: int = 10
     CHUNK_SIZE: int = 512
     CHUNK_OVERLAP: int = 50
+    HYBRID_SEARCH: bool = True
 
     FIGURES_DIR: str = "/app/figures"
     ALLOWED_ORIGINS: str = "http://localhost:3000"
