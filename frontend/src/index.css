@@ -76,6 +76,21 @@ body {
   color: var(--color-text-default);
 }
 
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 250ms ease-out;
+}
+
 /* Every component's transitions key off this, so a single media query
    disables motion app-wide for users who ask for it. */
 @media (prefers-reduced-motion: reduce) {
