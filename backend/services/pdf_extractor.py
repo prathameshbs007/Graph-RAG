@@ -2,6 +2,7 @@ import base64
 import io
 import logging
 import os
+import re
 
 import fitz  # PyMuPDF
 import pytesseract
@@ -12,6 +13,46 @@ from config import settings
 logger = logging.getLogger(__name__)
 
 MAX_FIGURE_BASE64_BYTES = 200 * 1024
+
+# Common abbreviations that precede a period without ending a sentence. Keeps the
+# regex splitter from breaking on "et al.", "Fig. 3", "e.g.", "Dr. Smith", etc.,
+# which are common in academic text.
+_ABBREVIATIONS = {
+    "mr", "mrs", "ms", "dr", "prof", "sr", "jr", "vs", "etc",
+    "e.g", "i.e", "fig", "figs", "eq", "eqs", "et", "al", "no",
+    "vol", "pp", "p", "ch", "sec", "approx", "cf", "ref", "refs",
+    "resp", "u.s", "u.k", "inc", "ltd", "co",
+}
+
+# A boundary candidate is sentence-ending punctuation followed by whitespace and
+# the start of a new sentence (capital letter, digit, quote, or open paren).
+_BOUNDARY_RE = re.compile(r'[.!?](\s+)(?=[A-Z0-9"‘“(]|$)')
+_TRAILING_WORD_RE = re.compile(r'(\b[A-Za-z.]+)\.$')
+
+
+def split_sentences(text: str) -> list[str]:
+    """Split text into sentences, treating common academic abbreviations as
+    non-boundaries so "et al. (2020) showed..." stays one sentence."""
+    text = text.strip()
+    if not text:
+        return []
+
+    sentences = []
+    start = 0
+    for match in _BOUNDARY_RE.finditer(text):
+        end = match.start() + 1  # include the punctuation mark itself
+        candidate = text[start:end]
+        word_match = _TRAILING_WORD_RE.search(candidate)
+        if word_match and word_match.group(1).lower().rstrip(".") in _ABBREVIATIONS:
+            continue  # not a real sentence boundary; keep accumulating
+        sentences.append(candidate.strip())
+        start = match.end()
+
+    tail = text[start:].strip()
+    if tail:
+        sentences.append(tail)
+
+    return [s for s in sentences if s]
 
 
 def _encode_figure_base64(pil_img: Image.Image, max_bytes: int = MAX_FIGURE_BASE64_BYTES) -> str:
@@ -27,15 +68,33 @@ def _encode_figure_base64(pil_img: Image.Image, max_bytes: int = MAX_FIGURE_BASE
             return base64.b64encode(data).decode("utf-8")
         quality -= 15
 
-def chunk_text(text: str, chunk_size=512, overlap=50) -> list[str]:
-    words = text.split()
+def chunk_text(text: str, chunk_size: int = 512) -> list[str]:
+    """Pack sentences into chunks of up to chunk_size words, never splitting a
+    sentence across chunks. Consecutive chunks share their boundary sentence for
+    continuity. A single sentence longer than chunk_size still becomes its own
+    (oversized) chunk rather than being cut mid-sentence."""
+    sentences = split_sentences(text)
+    if not sentences:
+        return []
+
     chunks = []
-    i = 0
-    while i < len(words):
-        chunk = " ".join(words[i:i + chunk_size])
-        if chunk.strip():
-            chunks.append(chunk)
-        i += chunk_size - overlap
+    current_sentences: list[str] = []
+    current_word_count = 0
+
+    for sentence in sentences:
+        sentence_word_count = len(sentence.split())
+        if current_sentences and current_word_count + sentence_word_count > chunk_size:
+            chunks.append(" ".join(current_sentences))
+            overlap_sentence = current_sentences[-1]
+            current_sentences = [overlap_sentence, sentence]
+            current_word_count = len(overlap_sentence.split()) + sentence_word_count
+        else:
+            current_sentences.append(sentence)
+            current_word_count += sentence_word_count
+
+    if current_sentences:
+        chunks.append(" ".join(current_sentences))
+
     return chunks
 
 def extract_pdf_data(file_path: str, paper_id: str, output_dir: str):
@@ -60,7 +119,7 @@ def extract_pdf_data(file_path: str, paper_id: str, output_dir: str):
                 logger.error("OCR failed for page %d: %s", page_num + 1, e)
 
         if text:
-            page_chunks = chunk_text(text, settings.CHUNK_SIZE, settings.CHUNK_OVERLAP)
+            page_chunks = chunk_text(text, settings.CHUNK_SIZE)
             for c in page_chunks:
                 chunks_data.append({
                     "chunk_text": c,
