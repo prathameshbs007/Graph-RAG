@@ -6,8 +6,9 @@ import { GraphExplorer } from './components/GraphExplorer';
 import { useQuery } from './hooks/useQuery';
 
 function App() {
-  const { executeQuery, data, loading, error } = useQuery();
+  const { executeQuery, data, compareData, loading, error } = useQuery();
   const [activeTab, setActiveTab] = useState<'search' | 'upload' | 'graph'>('search');
+  const [compareMode, setCompareMode] = useState(false);
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans text-gray-900">
@@ -34,13 +35,33 @@ function App() {
 
       <main className="flex-1 p-8 max-w-7xl mx-auto w-full">
         {activeTab === 'search' && (
-          <div className="flex flex-col gap-8 items-center max-w-4xl mx-auto mt-10">
-            <QueryBar onSearch={(txt) => executeQuery(txt)} loading={loading} />
+          <div className={`flex flex-col gap-8 items-center mx-auto mt-10 ${compareData ? 'max-w-6xl' : 'max-w-4xl'}`}>
+            <div className="w-full max-w-4xl">
+              <QueryBar
+                onSearch={(txt) => executeQuery(txt, compareMode)}
+                loading={loading}
+                compareMode={compareMode}
+                onCompareModeChange={setCompareMode}
+              />
+            </div>
 
             {error && <div className="text-red-500 bg-red-50 p-4 rounded-lg w-full border border-red-200">{error}</div>}
 
+            {compareData && !loading && (
+              <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">With Knowledge Graph</h3>
+                  <AnswerCard data={compareData.with_graph} />
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Vector Search Only</h3>
+                  <AnswerCard data={compareData.without_graph} />
+                </div>
+              </div>
+            )}
+
             {data && !loading && (
-              <div className="w-full">
+              <div className="w-full max-w-4xl">
                 <AnswerCard data={data} />
               </div>
             )}

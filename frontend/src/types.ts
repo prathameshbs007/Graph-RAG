@@ -33,6 +33,11 @@ export interface QueryResponse {
   graph_context: GraphContext;
 }
 
+export interface QueryCompareResponse {
+  with_graph: QueryResponse;
+  without_graph: QueryResponse;
+}
+
 export interface IngestAcceptedResponse {
   id: string;
   status: string;
