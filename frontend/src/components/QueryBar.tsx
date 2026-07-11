@@ -51,7 +51,7 @@ export const QueryBar = ({
                     type="checkbox"
                     checked={compareMode}
                     onChange={e => onCompareModeChange(e.target.checked)}
-                    className="rounded accent-accent-600"
+                    className="rounded accent-accent-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 focus-visible:ring-offset-1"
                 />
                 Compare graph impact
             </label>

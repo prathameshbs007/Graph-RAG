@@ -23,7 +23,7 @@ export const AnswerCard = ({ data }: { data: QueryResponse | null }) => {
                                 href={href}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="text-accent-600 dark:text-accent-400 underline underline-offset-2 hover:text-accent-700 dark:hover:text-accent-300"
+                                className="text-accent-600 dark:text-accent-400 underline underline-offset-2 hover:text-accent-700 dark:hover:text-accent-300 transition-colors duration-150 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500"
                             >
                                 {children}
                             </a>
