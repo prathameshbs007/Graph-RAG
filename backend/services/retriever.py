@@ -25,7 +25,7 @@ def _sparse_query_vector(query_text: str) -> Optional[SparseVector]:
         return None
 
 
-def retrieve_context(query_text: str, top_k: Optional[int] = None, rerank_top_n: Optional[int] = None):
+def retrieve_context(query_text: str, top_k: Optional[int] = None, rerank_top_n: Optional[int] = None, use_graph: bool = True):
     top_k = top_k if top_k is not None else settings.RETRIEVAL_TOP_K
     rerank_top_n = rerank_top_n if rerank_top_n is not None else settings.RERANK_TOP_N
 
@@ -46,8 +46,12 @@ def retrieve_context(query_text: str, top_k: Optional[int] = None, rerank_top_n:
     all_results = text_results + image_results
     paper_ids = list(set([res["paper_id"] for res in all_results if res.get("paper_id")]))
 
-    # 3. Neo4j Graph Traversal
-    graph_context = graph_db.get_related_graph_context(paper_ids)
+    # 3. Neo4j Graph Traversal (skipped when use_graph=False, e.g. for the
+    # with/without-graph comparison endpoint)
+    if use_graph:
+        graph_context = graph_db.get_related_graph_context(paper_ids)
+    else:
+        graph_context = {"related_papers": [], "concepts": []}
 
     # 4. Rerank: text/audio chunks only. Figures are never mixed into this ranking.
     docs_for_rerank = [res.get("chunk_text", "") for res in text_results]

@@ -70,3 +70,34 @@ def test_query_endpoint_returns_502_on_runtime_error(mock_retrieve_context):
         response = client.post("/query", json={"text": "test"})
 
     assert response.status_code == 502
+
+
+@patch("routers.query.generator")
+@patch("routers.query.retrieve_context")
+def test_query_endpoint_passes_use_graph_through(mock_retrieve_context, mock_generator):
+    mock_retrieve_context.return_value = ([], [], {"related_papers": [], "concepts": []})
+    mock_generator.generate_answer.return_value = "answer"
+
+    with TestClient(app) as client:
+        client.post("/query", json={"text": "q", "use_graph": False})
+
+    assert mock_retrieve_context.call_args.kwargs["use_graph"] is False
+
+
+@patch("routers.query.generator")
+@patch("routers.query.retrieve_context")
+def test_compare_endpoint_runs_both_variants(mock_retrieve_context, mock_generator):
+    def fake_retrieve(text, top_k=None, rerank_top_n=None, use_graph=True):
+        graph_context = {"related_papers": ["Other Paper"], "concepts": ["X"]} if use_graph else {"related_papers": [], "concepts": []}
+        return [], [], graph_context
+
+    mock_retrieve_context.side_effect = fake_retrieve
+    mock_generator.generate_answer.return_value = "answer"
+
+    with TestClient(app) as client:
+        response = client.post("/query/compare", json={"text": "q"})
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["with_graph"]["graph_context"]["related_papers"] == ["Other Paper"]
+    assert body["without_graph"]["graph_context"]["related_papers"] == []

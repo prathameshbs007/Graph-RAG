@@ -1,10 +1,13 @@
+from typing import List, Literal, Optional
+
 from pydantic import BaseModel
-from typing import Optional, List, Literal
+
 
 class QueryRequest(BaseModel):
     text: str
     top_k: int = 10
     rerank_top_n: int = 5
+    use_graph: bool = True
 
 class SourceChunk(BaseModel):
     chunk_id: str
@@ -36,3 +39,7 @@ class QueryResponse(BaseModel):
     sources: List[SourceChunk]
     figures: List[FigureReference]
     graph_context: GraphContext
+
+class QueryCompareResponse(BaseModel):
+    with_graph: QueryResponse
+    without_graph: QueryResponse
