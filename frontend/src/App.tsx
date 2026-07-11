@@ -88,7 +88,7 @@ function App() {
 
         {activeTab === 'graph' && (
           <div className="mt-4">
-            <GraphExplorer />
+            <GraphExplorer isDark={isDark} />
           </div>
         )}
       </main>

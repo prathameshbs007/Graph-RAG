@@ -91,6 +91,20 @@ body {
   animation: fade-in 250ms ease-out;
 }
 
+/* react-force-graph-2d injects its own hover-tooltip div (class
+   float-tooltip-kap) directly into the DOM, bypassing React -- this is the
+   only way to theme it, since there's no className prop for it. */
+.float-tooltip-kap {
+  background: var(--color-neutral-900) !important;
+  color: var(--color-neutral-50) !important;
+  border: 1px solid var(--color-neutral-700) !important;
+  border-radius: 0.5rem !important;
+  padding: 6px 10px !important;
+  font-family: var(--font-sans) !important;
+  font-size: 12px !important;
+  box-shadow: var(--shadow-md) !important;
+}
+
 /* Every component's transitions key off this, so a single media query
    disables motion app-wide for users who ask for it. */
 @media (prefers-reduced-motion: reduce) {
