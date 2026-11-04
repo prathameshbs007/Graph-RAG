@@ -1,124 +1,93 @@
-from fastapi import APIRouter, UploadFile, File, Form
-from models.ingest import IngestPDFResponse
-from services.pdf_extractor import extract_pdf_data
-from services.embedder import get_text_embedding
-from services.clip_embedder import clip_embedder
-from services.weaviate_client import db
-from services.neo4j_client import graph_db
-from config import settings
-import uuid
 import os
+import tempfile
+import uuid
+
+from fastapi import APIRouter, BackgroundTasks, File, Form, HTTPException, UploadFile
+
+from config import settings
+from models.ingest import IngestAudioResponse, IngestPDFResponse
+from services import ingestion
 
 router = APIRouter(prefix="/ingest", tags=["ingest"])
 
+
+def _save_upload(data: bytes, suffix: str) -> str:
+    fd, path = tempfile.mkstemp(suffix=suffix)
+    with os.fdopen(fd, "wb") as f:
+        f.write(data)
+    return path
+
+
+def _run_pdf(pdf_path, paper_id, title, authors, year, figures_dir, job):
+    # plain function: Starlette runs it in a worker thread, so it never blocks the event loop
+    try:
+        ingestion.ingest_pdf(pdf_path, paper_id, title, authors, year, figures_dir, job)
+    finally:
+        if os.path.exists(pdf_path):
+            os.remove(pdf_path)
+
+
+def _run_audio(audio_path, audio_id, title, source_paper_id, job):
+    try:
+        ingestion.ingest_audio(audio_path, audio_id, title, source_paper_id, job=job)
+    finally:
+        if os.path.exists(audio_path):
+            os.remove(audio_path)
+
+
 @router.post("/pdf", response_model=IngestPDFResponse)
 async def ingest_pdf(
+    background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     title: str = Form(None),
     authors: str = Form(None),
-    year: int = Form(None)
+    year: int = Form(None),
 ):
     paper_id = str(uuid.uuid4())
-    pdf_path = f"/tmp/{paper_id}.pdf"
-    
-    with open(pdf_path, "wb") as f:
-        f.write(await file.read())
-        
-    paper_title = title if title else file.filename
-    author_list = [a.strip() for a in authors.split(",")] if authors else []
-    paper_year = year if year else 2024
-    
-    # Extract
-    figures_dir = settings.FIGURES_DIR
-    chunks_data, figures_data = extract_pdf_data(pdf_path, paper_id, figures_dir)
-    
-    # Process text chunks using batching for massive speedup
-    if chunks_data:
-        texts = [chunk["chunk_text"] for chunk in chunks_data]
-        embeddings = get_text_embedding(texts)
-        for i, chunk in enumerate(chunks_data):
-            chunk["paper_id"] = paper_id
-            chunk["paper_title"] = paper_title
-            chunk["authors"] = author_list
-            chunk["year"] = paper_year
-            chunk["vector"] = embeddings[i] if i < len(embeddings) else []
-        
-    # Process figures
-    for fig in figures_data:
-        fig["paper_id"] = paper_id
-        fig["paper_title"] = paper_title
-        fig["vector"] = clip_embedder.get_image_embedding(fig["file_path"])
-        
-    # DB inserts
-    try:
-        db.insert_text_chunks(chunks_data)
-        db.insert_figure_chunks(figures_data)
-        graph_db.create_paper_node(paper_id, paper_title, paper_year, author_list)
-    except Exception as e:
-        print(f"Failed to ingest: {e}")
-        return IngestPDFResponse(
-            paper_id=paper_id,
-            chunks_created=0,
-            figures_extracted=0,
-            graph_nodes_created=0,
-            status=f"error: {str(e)}"
-        )
-        
+    pdf_path = _save_upload(await file.read(), ".pdf")
+    author_list = [a.strip() for a in authors.split(",") if a.strip()] if authors else []
+    job = ingestion.new_job(paper_id, "pdf", title or file.filename)
+    background_tasks.add_task(
+        _run_pdf, pdf_path, paper_id, title or file.filename, author_list, year, settings.FIGURES_DIR, job
+    )
     return IngestPDFResponse(
         paper_id=paper_id,
-        chunks_created=len(chunks_data),
-        figures_extracted=len(figures_data),
-        graph_nodes_created=1 + len(author_list),
-        status="success"
+        chunks_created=0,
+        figures_extracted=0,
+        graph_nodes_created=0,
+        status="queued - processing in background",
     )
 
-from models.ingest import IngestAudioResponse
-from services.audio_transcriber import transcriber
 
 @router.post("/audio", response_model=IngestAudioResponse)
 async def ingest_audio(
+    background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     title: str = Form(None),
-    source_paper_id: str = Form(None)
+    source_paper_id: str = Form(None),
 ):
     audio_id = str(uuid.uuid4())
-    audio_path = f"/tmp/{audio_id}_{file.filename}"
-    
-    with open(audio_path, "wb") as f:
-        f.write(await file.read())
-        
-    audio_title = title if title else file.filename
-    
-    # Transcribe
-    chunks_data, duration, num_segments = transcriber.transcribe(audio_path)
-    
-    # Process text chunks
-    if chunks_data:
-        texts = [chunk["chunk_text"] for chunk in chunks_data]
-        embeddings = get_text_embedding(texts)
-        for i, chunk in enumerate(chunks_data):
-            chunk["audio_id"] = audio_id
-            chunk["title"] = audio_title
-            chunk["source_paper_id"] = source_paper_id if source_paper_id else ""
-            chunk["vector"] = embeddings[i] if i < len(embeddings) else []
-        
-    # DB insert
-    try:
-        db.insert_audio_chunks(chunks_data)
-    except Exception as e:
-        print(f"Failed to ingest audio: {e}")
-        return IngestAudioResponse(
-            audio_id=audio_id,
-            segments=num_segments,
-            chunks_created=0,
-            duration_seconds=float(duration),
-            status=f"error: {str(e)}"
-        )
-        
+    suffix = os.path.splitext(file.filename or "")[1] or ".audio"
+    audio_path = _save_upload(await file.read(), suffix)
+    job = ingestion.new_job(audio_id, "audio", title or file.filename)
+    background_tasks.add_task(_run_audio, audio_path, audio_id, title or file.filename, source_paper_id, job)
     return IngestAudioResponse(
         audio_id=audio_id,
-        segments=num_segments,
-        chunks_created=len(chunks_data),
-        duration_seconds=float(duration),
-        status="success"
+        segments=0,
+        chunks_created=0,
+        duration_seconds=0.0,
+        status="queued - processing in background",
     )
+
+
+@router.get("/status/{job_id}")
+def ingest_status(job_id: str):
+    job = ingestion.JOBS.get(job_id)
+    if job is None:
+        raise HTTPException(status_code=404, detail="unknown job id (the server may have restarted)")
+    return job.as_dict()
+
+
+@router.get("/jobs")
+def ingest_jobs():
+    return {"jobs": [j.as_dict() for j in reversed(list(ingestion.JOBS.values()))]}

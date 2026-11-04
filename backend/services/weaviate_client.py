@@ -1,108 +1,143 @@
 import weaviate
+from weaviate.util import generate_uuid5
+
 from config import settings
+from services.schema import CHUNK_CLASS, PROPERTY_NAMES, ensure_weaviate_schema
+
+# Properties that carry data into the stored object (``vector`` and bookkeeping are separate).
+_INSERT_FIELDS = [p for p in PROPERTY_NAMES]
+
+
+class WeaviateError(RuntimeError):
+    pass
+
 
 class WeaviateDB:
     def __init__(self):
-        self.client = weaviate.Client(url=settings.WEAVIATE_URL)
+        self._client = None
 
-    def insert_text_chunks(self, chunks: list[dict]):
+    @property
+    def client(self):
+        # connect lazily so importing the app never needs a live database
+        if self._client is None:
+            self._client = weaviate.Client(url=settings.WEAVIATE_URL)
+        return self._client
+
+    # ------------------------------------------------------------------ schema
+    def ensure_schema(self):
+        ensure_weaviate_schema(self.client)
+
+    def reset(self):
+        """Drop everything and recreate the schema."""
+        self.client.schema.delete_all()
+        self.ensure_schema()
+
+    # ------------------------------------------------------------------ insert
+    def insert_chunks(self, chunks: list[dict]) -> int:
+        """Insert items that each have ``chunk_id``, ``modality`` and ``vector``.
+
+        The object UUID is derived from ``chunk_id`` so re-ingesting overwrites rather
+        than duplicates.
+        """
+        errors: list[str] = []
+
+        def on_batch(results):
+            for r in results or []:
+                errs = r.get("result", {}).get("errors")
+                if errs:
+                    errors.append(str(errs))
+
+        self.client.batch.configure(batch_size=100, callback=on_batch)
         with self.client.batch as batch:
-            batch.batch_size=100
             for chunk in chunks:
-                properties = {
-                    "paper_id": chunk.get("paper_id"),
-                    "paper_title": chunk.get("paper_title"),
-                    "authors": chunk.get("authors", []),
-                    "year": chunk.get("year"),
-                    "chunk_text": chunk.get("chunk_text"),
-                    "chunk_index": chunk.get("chunk_index"),
-                    "page": chunk.get("page")
-                }
-                vector = chunk.get("vector")
+                if not chunk.get("vector"):
+                    raise WeaviateError(f"chunk {chunk.get('chunk_id')} has no vector")
+                props = {k: chunk[k] for k in _INSERT_FIELDS if chunk.get(k) is not None}
                 batch.add_data_object(
-                    data_object=properties,
-                    class_name="TextChunk",
-                    vector=vector
+                    data_object=props,
+                    class_name=CHUNK_CLASS,
+                    uuid=generate_uuid5(chunk["chunk_id"]),
+                    vector=chunk["vector"],
                 )
+        if errors:
+            raise WeaviateError(f"{len(errors)} batch errors, first: {errors[0]}")
+        return len(chunks)
 
-    def insert_figure_chunks(self, figures: list[dict]):
-        with self.client.batch as batch:
-            batch.batch_size=100
-            for fig in figures:
-                properties = {
-                    "paper_id": fig.get("paper_id"),
-                    "paper_title": fig.get("paper_title"),
-                    "figure_id": fig.get("figure_id"),
-                    "caption": fig.get("caption"),
-                    "page": fig.get("page"),
-                    "file_path": fig.get("file_path"),
-                }
-                vector = fig.get("vector")
-                batch.add_data_object(
-                    data_object=properties,
-                    class_name="FigureChunk",
-                    vector=vector
-                )
+    # ------------------------------------------------------------------ search
+    def _do(self, builder) -> list[dict]:
+        res = builder.do()
+        if res.get("errors"):
+            raise WeaviateError(str(res["errors"]))
+        return res.get("data", {}).get("Get", {}).get(CHUNK_CLASS) or []
 
-    def insert_audio_chunks(self, chunks: list[dict]):
-        with self.client.batch as batch:
-            batch.batch_size=100
-            for chunk in chunks:
-                properties = {
-                    "audio_id": chunk.get("audio_id"),
-                    "title": chunk.get("title"),
-                    "chunk_text": chunk.get("chunk_text"),
-                    "start_time": chunk.get("start_time"),
-                    "end_time": chunk.get("end_time"),
-                    "source_paper_id": chunk.get("source_paper_id", ""),
-                }
-                vector = chunk.get("vector")
-                batch.add_data_object(
-                    data_object=properties,
-                    class_name="AudioChunk",
-                    vector=vector
-                )
+    @staticmethod
+    def _hit(item: dict, score: float) -> dict:
+        hit = {k: v for k, v in item.items() if k != "_additional"}
+        hit["score"] = score
+        return hit
 
-    def search_all_classes(self, query_vector: list[float], clip_vector: list[float] = None, limit: int = 10) -> list[dict]:
-        results = []
-        # Standardize retrieval field mapping across classes
-        fields_map = {
-            "TextChunk": ["paper_id", "paper_title", "chunk_text", "authors", "year"],
-            "FigureChunk": ["paper_id", "paper_title", "figure_id", "caption", "file_path", "page"],
-            "AudioChunk": ["source_paper_id", "title", "chunk_text"]
+    def bm25(self, query: str, limit: int) -> list[dict]:
+        """Top-``limit`` by BM25 over ``chunk_text``, best first."""
+        if not query.strip():
+            return []
+        builder = (
+            self.client.query.get(CHUNK_CLASS, PROPERTY_NAMES)
+            .with_bm25(query=query, properties=["chunk_text"])
+            .with_additional(["score"])
+            .with_limit(limit)
+        )
+        return [self._hit(i, float(i.get("_additional", {}).get("score") or 0.0)) for i in self._do(builder)]
+
+    def dense(self, vector: list[float], limit: int) -> list[dict]:
+        """Top-``limit`` by cosine similarity, best first (score = certainty in [0, 1])."""
+        builder = (
+            self.client.query.get(CHUNK_CLASS, PROPERTY_NAMES)
+            .with_near_vector({"vector": vector})
+            .with_additional(["certainty"])
+            .with_limit(limit)
+        )
+        return [self._hit(i, float(i.get("_additional", {}).get("certainty") or 0.0)) for i in self._do(builder)]
+
+    def fetch(self, chunk_ids: list[str]) -> dict[str, dict]:
+        """Load items by ``chunk_id`` (used for items reached through the graph)."""
+        if not chunk_ids:
+            return {}
+        where = {
+            "operator": "Or",
+            "operands": [{"path": ["chunk_id"], "operator": "Equal", "valueText": cid} for cid in chunk_ids],
         }
-        for cls, fields in fields_map.items():
-            try:
-                target_vector = clip_vector if cls == "FigureChunk" and clip_vector else query_vector
-                res = (
-                    self.client.query
-                    .get(cls, fields)
-                    .with_near_vector({"vector": target_vector})
-                    .with_limit(limit)
-                    .with_additional("certainty")
-                    .do()
-                )
-                items = res.get("data", {}).get("Get", {}).get(cls)
-                if items:
-                    for item in items:
-                        item_copy = dict(item)
-                        item_copy["modality"] = "text" if cls == "TextChunk" else ("image" if cls == "FigureChunk" else "audio")
-                        item_copy["score"] = item_copy.pop("_additional", {}).get("certainty", 0)
-                        
-                        # Normalize common fields for uniform processing
-                        if cls == "AudioChunk":
-                            item_copy["paper_id"] = item_copy.get("source_paper_id", "")
-                            item_copy["paper_title"] = item_copy.get("title", "")
-                            
-                        item_copy["chunk_text"] = item_copy.get("chunk_text") or item_copy.get("caption", "")
-                        item_copy["chunk_id"] = "chunk_" + str(hash(item_copy["chunk_text"]))
-                        results.append(item_copy)
-            except Exception as e:
-                print(f"Error searching {cls}: {e}")
-        
-        # Sort the overall results for good measure, but do not truncate globally.
-        # Top-K was already applied per-class by .with_limit(limit) inside the loop! 
-        results.sort(key=lambda x: x["score"], reverse=True)
-        return results
+        builder = (
+            self.client.query.get(CHUNK_CLASS, PROPERTY_NAMES).with_where(where).with_limit(len(chunk_ids))
+        )
+        return {i["chunk_id"]: self._hit(i, 0.0) for i in self._do(builder)}
+
+    def iterate_chunks(self, batch: int = 200):
+        """Every stored chunk, using Weaviate's cursor API (used to build the evaluation corpus)."""
+        cursor = None
+        while True:
+            q = self.client.query.get(CHUNK_CLASS, PROPERTY_NAMES).with_additional(["id"]).with_limit(batch)
+            if cursor:
+                q = q.with_after(cursor)
+            items = self._do(q)
+            if not items:
+                return
+            for it in items:
+                yield {k: v for k, v in it.items() if k != "_additional"}
+            cursor = items[-1]["_additional"]["id"]
+
+    def delete_where(self, prop: str, value: str):
+        """Delete every object whose ``prop`` equals ``value`` (used to undo a failed ingest)."""
+        self.client.batch.delete_objects(
+            class_name=CHUNK_CLASS,
+            where={"path": [prop], "operator": "Equal", "valueText": value},
+        )
+
+    def count(self) -> int:
+        res = self.client.query.aggregate(CHUNK_CLASS).with_meta_count().do()
+        try:
+            return res["data"]["Aggregate"][CHUNK_CLASS][0]["meta"]["count"]
+        except (KeyError, IndexError, TypeError):
+            return 0
+
 
 db = WeaviateDB()

@@ -1,18 +1,38 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import axios from "axios";
 import { UploadPanel } from "./components/UploadPanel";
 import { QueryBar } from "./components/QueryBar";
 import { AnswerCard } from "./components/AnswerCard";
 import { GraphExplorer } from "./components/GraphExplorer";
+import { MemoryPanel } from "./components/MemoryPanel";
 import { ClearDBButton } from "./components/ClearDBButton";
 import { UploadNotification } from "./components/UploadNotification";
 import { UploadProvider } from "./contexts/UploadContext";
 import { useQuery } from "./hooks/useQuery";
+import { API } from "./api";
+import type { SystemInfo } from "./types";
+
+type Tab = "search" | "upload" | "graph" | "memory";
+
+const TABS: { id: Tab; label: string }[] = [
+  { id: "search", label: "🔍 Search" },
+  { id: "graph", label: "📊 Graph" },
+  { id: "memory", label: "🧠 Memory" },
+  { id: "upload", label: "📤 Ingest" },
+];
 
 function AppContent() {
   const { executeQuery, data, loading, error } = useQuery();
-  const [activeTab, setActiveTab] = useState<"search" | "upload" | "graph">(
-    "search",
-  );
+  const [activeTab, setActiveTab] = useState<Tab>("search");
+  const [systems, setSystems] = useState<SystemInfo[]>([]);
+  const [system, setSystem] = useState("full");
+
+  useEffect(() => {
+    axios
+      .get<{ systems: SystemInfo[] }>(`${API}/query/systems`)
+      .then((r) => setSystems(r.data.systems))
+      .catch(() => setSystems([]));
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 flex flex-col font-sans text-gray-900 overflow-x-hidden">
@@ -48,14 +68,10 @@ function AppContent() {
 
             {/* Navigation */}
             <nav className="flex gap-2 items-center">
-              {[
-                { id: "search", label: "🔍 Search", icon: "🔍" },
-                { id: "graph", label: "📊 Graph", icon: "📊" },
-                { id: "upload", label: "📤 Ingest", icon: "📤" },
-              ].map((tab) => (
+              {TABS.map((tab) => (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id as any)}
+                  onClick={() => setActiveTab(tab.id)}
                   className={`px-5 py-2.5 rounded-xl font-semibold transition-all duration-300 relative overflow-hidden group ${
                     activeTab === tab.id
                       ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/50"
@@ -96,7 +112,25 @@ function AppContent() {
             </div>
 
             {/* Search Bar */}
-            <QueryBar onSearch={(txt) => executeQuery(txt)} loading={loading} />
+            <QueryBar onSearch={(txt) => executeQuery(txt, system)} loading={loading} />
+
+            {/* Which retrieval system answers: ResearchOS itself or a baseline / ablation */}
+            {systems.length > 0 && (
+              <label className="flex items-center gap-3 text-sm text-gray-300">
+                <span className="uppercase tracking-widest text-xs font-semibold text-gray-400">System</span>
+                <select
+                  value={system}
+                  onChange={(e) => setSystem(e.target.value)}
+                  className="bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 text-white text-sm"
+                >
+                  {systems.map((s) => (
+                    <option key={s.name} value={s.name} className="text-gray-900">
+                      {s.description || s.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
 
             {/* Error State */}
             {error && (
@@ -180,6 +214,12 @@ function AppContent() {
         {activeTab === "graph" && (
           <div className="mt-4">
             <GraphExplorer />
+          </div>
+        )}
+
+        {activeTab === "memory" && (
+          <div className="mt-4">
+            <MemoryPanel />
           </div>
         )}
       </main>

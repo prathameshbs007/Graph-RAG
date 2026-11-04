@@ -54,3 +54,9 @@ build/
 # OS
 .DS_Store
 Thumbs.db
+
+# Evaluation runs (results, snapshots, caches)
+eval_runs/
+
+# Test caches
+.pytest_cache/

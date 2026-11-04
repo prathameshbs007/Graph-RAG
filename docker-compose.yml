@@ -18,6 +18,27 @@ services:
       neo4j:    { condition: service_healthy }
       ollama:   { condition: service_started }
 
+  # Module 5 (Ragas evaluation). Opt-in so a normal "docker compose up" never builds it:
+  #   docker compose --profile eval run --rm eval --run run1 testset --size 200
+  # See backend/eval/README.md for the full sequence.
+  eval:
+    profiles: ["eval"]
+    build:
+      context: ./backend
+      args:
+        EXTRA_REQUIREMENTS: requirements-eval.txt
+    env_file: .env
+    environment:
+      EVAL_DIR: /app/eval_runs
+    volumes:
+      - eval_data:/app/eval_runs
+      - figures_data:/app/figures
+    depends_on:
+      weaviate: { condition: service_healthy }
+      neo4j:    { condition: service_healthy }
+      ollama:   { condition: service_started }
+    entrypoint: ["python", "-m", "eval"]
+
   weaviate:
     image: semitechnologies/weaviate:1.24.1
     ports: ["8080:8080"]
@@ -39,7 +60,6 @@ services:
     ports: ["7474:7474", "7687:7687"]
     environment:
       NEO4J_AUTH: neo4j/researchos123
-      NEO4J_PLUGINS: '["apoc"]'
     volumes: [neo4j_data:/data]
     healthcheck:
       test: ["CMD", "cypher-shell", "-u", "neo4j", "-p", "researchos123", "RETURN 1"]
@@ -51,10 +71,11 @@ services:
     image: ollama/ollama:latest
     ports: ["11434:11434"]
     volumes: [ollama_data:/root/.ollama]
-    entrypoint: ["/bin/sh", "-c", "ollama serve & sleep 5 && ollama pull nomic-embed-text && wait"]
+    entrypoint: ["/bin/sh", "-c", "ollama serve & sleep 5 && (ollama pull nomic-embed-text || true) && wait"]
 
 volumes:
   weaviate_data:
   neo4j_data:
   ollama_data:
   figures_data:
+  eval_data:

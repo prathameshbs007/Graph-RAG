@@ -76,23 +76,39 @@ export const useUploadQueue = () => {
         updateFn(pendingTask.id, { progress: 40 });
 
         const endpoint = isAudio ? '/ingest/audio' : '/ingest/pdf';
-        const res = await fetch(`http://localhost:8054${endpoint}`, {
-          method: 'POST',
-          body: formData,
-        });
+        
+        // Create abort controller with 5-minute timeout for large files
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5 * 60 * 1000);
+        
+        try {
+          const res = await fetch(`http://localhost:8054${endpoint}`, {
+            method: 'POST',
+            body: formData,
+            signal: controller.signal,
+          });
 
-        updateFn(pendingTask.id, { progress: 80 });
+          clearTimeout(timeoutId);
+          updateFn(pendingTask.id, { progress: 80 });
 
-        if (!res.ok) {
-          throw new Error(`HTTP ${res.status}`);
+          if (!res.ok) {
+            const errorText = await res.text();
+            throw new Error(`HTTP ${res.status}: ${errorText}`);
+          }
+
+          const data = await res.json();
+          updateFn(pendingTask.id, {
+            progress: 100,
+            status: 'completed' as const,
+            result: data,
+          });
+        } catch (fetchError) {
+          clearTimeout(timeoutId);
+          if (fetchError instanceof Error && fetchError.name === 'AbortError') {
+            throw new Error('Upload timeout - server took too long to process');
+          }
+          throw fetchError;
         }
-
-        const data = await res.json();
-        updateFn(pendingTask.id, {
-          progress: 100,
-          status: 'completed' as const,
-          result: data,
-        });
       } catch (error) {
         updateFn(pendingTask.id, {
           status: 'error' as const,
