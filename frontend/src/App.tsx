@@ -12,13 +12,13 @@ import { useQuery } from "./hooks/useQuery";
 import { API } from "./api";
 import type { SystemInfo } from "./types";
 
-type Tab = "search" | "upload" | "graph" | "memory";
+type Tab = "search" | "graph" | "memory" | "upload";
 
-const TABS: { id: Tab; label: string }[] = [
-  { id: "search", label: "🔍 Search" },
-  { id: "graph", label: "📊 Graph" },
-  { id: "memory", label: "🧠 Memory" },
-  { id: "upload", label: "📤 Ingest" },
+const TABS: { id: Tab; label: string; icon: string }[] = [
+  { id: "search", label: "Search & QA", icon: "travel_explore" },
+  { id: "graph", label: "Graph Explorer", icon: "hub" },
+  { id: "memory", label: "Agentic Memory", icon: "psychology" },
+  { id: "upload", label: "Ingestion Studio", icon: "publish" },
 ];
 
 function AppContent() {
@@ -35,168 +35,142 @@ function AppContent() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 flex flex-col font-sans text-gray-900 overflow-x-hidden">
-      {/* Animated background elements */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 -left-4 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
-        <div className="absolute top-0 -right-4 w-72 h-72 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" style={{ animationDelay: '2s' }}></div>
-        <div className="absolute -bottom-8 left-20 w-72 h-72 bg-cyan-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" style={{ animationDelay: '4s' }}></div>
-      </div>
+    <div className="bg-surface font-sans text-on-surface min-h-screen relative overflow-x-hidden selection:bg-primary selection:text-on-primary">
+      {/* Background ambient radial gradients */}
+      <div className="fixed inset-0 pointer-events-none bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(128,131,255,0.12),transparent_70%)] z-0"></div>
 
-      {/* Content */}
-      <div className="relative z-10">
-        {/* Premium Header */}
-        <header className="sticky top-0 z-50 glass border-b border-white/10">
-          <div className="px-8 py-4 flex justify-between items-center">
-            {/* Logo Section */}
-            <div className="flex items-center gap-4">
-              <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl blur-lg opacity-75"></div>
-                <div className="relative w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
-                  <span className="text-white font-black text-xl">○</span>
-                </div>
+      {/* Global Header */}
+      <header className="sticky top-0 w-full z-50 bg-surface-container-lowest/85 backdrop-blur-2xl border-b border-surface-container-highest/30">
+        <div className="h-16 w-full px-4 md:px-8 flex items-center justify-between gap-4 max-w-7xl mx-auto">
+          {/* Brand Logo & Version */}
+          <div className="flex items-center gap-4 shrink-0">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-surface-container-high flex items-center justify-center text-primary shadow-[0_0_12px_rgba(192,193,255,0.25)]">
+                <span className="material-symbols-outlined text-[1.25rem]">hub</span>
               </div>
-              <div>
-                <h1 className="text-3xl font-black tracking-tighter text-gradient">
-                  ResearchOS
-                </h1>
-                <p className="text-xs font-semibold text-cyan-300 tracking-widest uppercase">
-                  Knowledge Graph Intelligence
-                </p>
-              </div>
+              <span className="font-bold text-lg text-on-surface tracking-tight font-sans">
+                ResearchOS
+              </span>
+              <span className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-surface-container-highest text-tertiary tracking-wider uppercase">
+                v2.4-agentic
+              </span>
             </div>
 
-            {/* Navigation */}
-            <nav className="flex gap-2 items-center">
-              {TABS.map((tab) => (
+            {/* Model / DB Status Indicators */}
+            <div className="hidden xl:flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-surface-container-low font-mono text-[11px] text-on-surface-variant">
+                <span className="w-1.5 h-1.5 rounded-full bg-secondary shadow-[0_0_8px_#4fdbc8] animate-pulse"></span>
+                <span>Groq Llama-3.3</span>
+              </div>
+              <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-surface-container-low font-mono text-[11px] text-on-surface-variant">
+                <span className="w-1.5 h-1.5 rounded-full bg-secondary-container shadow-[0_0_8px_#04b4a2]"></span>
+                <span>Weaviate Hybrid</span>
+              </div>
+              <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-surface-container-low font-mono text-[11px] text-on-surface-variant">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary-container shadow-[0_0_8px_#8083ff]"></span>
+                <span>Neo4j Bolt</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Navigation Tabs */}
+          <nav className="flex items-center p-1 rounded-xl bg-surface-container-lowest/80 border border-surface-container-highest/40 gap-1">
+            {TABS.map((tab) => {
+              const isActive = activeTab === tab.id;
+              return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`px-5 py-2.5 rounded-xl font-semibold transition-all duration-300 relative overflow-hidden group ${
-                    activeTab === tab.id
-                      ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/50"
-                      : "text-gray-300 hover:text-white hover:bg-white/5"
+                  type="button"
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                    isActive
+                      ? "bg-surface-container-high text-primary shadow-[0_0_10px_rgba(128,131,255,0.2)] border border-primary/30"
+                      : "text-on-surface-variant hover:text-on-surface hover:bg-surface-container/60"
                   }`}
                 >
-                  <span className="relative z-10">{tab.label}</span>
-                  {activeTab === tab.id && (
-                    <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 -z-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  )}
+                  <span className="material-symbols-outlined text-[1rem]">{tab.icon}</span>
+                  <span className="hidden sm:inline">{tab.label}</span>
                 </button>
-              ))}
+              );
+            })}
+          </nav>
 
-              <div className="w-px h-8 bg-white/20 mx-2"></div>
-              <ClearDBButton />
-            </nav>
+          {/* Right Header Utility Controls */}
+          <div className="flex items-center gap-2 shrink-0">
+            {systems.length > 0 && activeTab === "search" && (
+              <select
+                value={system}
+                onChange={(e) => setSystem(e.target.value)}
+                className="bg-surface-container-low border border-surface-container-highest/60 rounded-lg px-2.5 py-1 text-on-surface font-mono text-xs focus:outline-none hidden md:block"
+              >
+                {systems.map((s) => (
+                  <option key={s.name} value={s.name} className="bg-surface-container-high text-on-surface">
+                    {s.description || s.name}
+                  </option>
+                ))}
+              </select>
+            )}
+            <ClearDBButton />
           </div>
-        </header>
+        </div>
+      </header>
 
-      <main className="flex-1 p-8 max-w-7xl mx-auto w-full">
+      {/* Main Content Area */}
+      <main className="relative z-10 w-full max-w-7xl mx-auto px-4 md:px-8 py-6">
         {activeTab === "search" && (
-          <div className="flex flex-col gap-8 items-center max-w-4xl mx-auto">
-            {/* Hero Section */}
-            <div className="w-full text-center mb-8 space-y-3">
-              <div className="inline-block">
-                <span className="text-sm font-bold text-cyan-400 bg-cyan-400/10 px-4 py-2 rounded-full border border-cyan-400/30">
-                  ✨ Powered by Knowledge Graphs
-                </span>
-              </div>
-              <h2 className="text-5xl md:text-6xl font-black tracking-tighter">
-                <span className="text-gradient">Intelligent Research</span>
-                <br />
-                <span className="text-white">at Your Fingertips</span>
-              </h2>
-              <p className="text-lg text-gray-400 max-w-2xl mx-auto">
-                Explore documents, audio, and papers with AI-powered insights. Ask anything, get evidence-based answers.
-              </p>
-            </div>
-
-            {/* Search Bar */}
+          <div className="flex flex-col gap-6 max-w-5xl mx-auto">
+            {/* Search Omnibar */}
             <QueryBar onSearch={(txt) => executeQuery(txt, system)} loading={loading} />
 
-            {/* Which retrieval system answers: ResearchOS itself or a baseline / ablation */}
-            {systems.length > 0 && (
-              <label className="flex items-center gap-3 text-sm text-gray-300">
-                <span className="uppercase tracking-widest text-xs font-semibold text-gray-400">System</span>
-                <select
-                  value={system}
-                  onChange={(e) => setSystem(e.target.value)}
-                  className="bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 text-white text-sm"
-                >
-                  {systems.map((s) => (
-                    <option key={s.name} value={s.name} className="text-gray-900">
-                      {s.description || s.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            )}
-
-            {/* Error State */}
+            {/* Error Banner */}
             {error && (
-              <div className="w-full">
-                <div className="glass-dark border border-red-500/30 p-4 rounded-xl">
-                  <div className="flex gap-3">
-                    <span className="text-2xl flex-shrink-0">⚠️</span>
-                    <div>
-                      <p className="text-red-300 font-semibold">Something went wrong</p>
-                      <p className="text-sm text-red-200 mt-1">{error}</p>
-                    </div>
-                  </div>
+              <div className="p-4 rounded-xl bg-error-container/20 border border-error/40 text-error flex items-start gap-2.5 text-xs font-mono">
+                <span className="material-symbols-outlined text-[1.25rem]">error</span>
+                <div>
+                  <p className="font-semibold">Query Execution Failed</p>
+                  <p className="mt-0.5 text-error/90">{error}</p>
                 </div>
               </div>
             )}
 
-            {/* Results */}
-            {data && !loading && (
-              <div className="w-full">
-                <AnswerCard data={data} />
-              </div>
-            )}
+            {/* Results Component */}
+            {data && !loading && <AnswerCard data={data} />}
 
-            {/* Empty State */}
+            {/* Empty State Showcase */}
             {!data && !loading && !error && (
-              <div className="w-full mt-16 space-y-12">
-                <div className="text-center space-y-3">
-                  <p className="text-gray-400 text-sm uppercase tracking-widest font-semibold">Why ResearchOS?</p>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="w-full mt-6 space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {[
                     {
-                      icon: "📚",
-                      title: "Multi-Modal Knowledge",
-                      desc: "Analyze PDFs, audio transcripts, and papers simultaneously",
-                      color: "from-blue-500 to-cyan-500"
+                      icon: "auto_stories",
+                      title: "Cross-Modal Anchoring",
+                      desc: "Aligns PDF chunks, visual flowchart figures, and audio timestamps into a unified representation.",
+                      accent: "text-primary border-primary/20",
                     },
                     {
-                      icon: "🧠",
-                      title: "Intelligent Analysis",
-                      desc: "AI understands context and relationships across documents",
-                      color: "from-indigo-500 to-purple-500"
+                      icon: "grain",
+                      title: "Self-Pruning Memory",
+                      desc: "Hebbian reinforcement dynamic synapses decay and auto-prune noisy or unhelpful relations.",
+                      accent: "text-secondary border-secondary/20",
                     },
                     {
-                      icon: "⚡",
-                      title: "Real-Time Insights",
-                      desc: "Get answers with citations and visual evidence instantly",
-                      color: "from-purple-500 to-pink-500"
+                      icon: "verified_user",
+                      title: "NLI Claim Entailment",
+                      desc: "Verifies extracted answer claims against cited premise vectors with formal confidence scores.",
+                      accent: "text-tertiary border-tertiary/20",
                     },
                   ].map((item, idx) => (
                     <div
                       key={idx}
-                      className="card-hover group relative overflow-hidden rounded-2xl p-8 glass-dark border border-white/10"
+                      className={`p-5 rounded-xl bg-surface-container-low/70 border ${item.accent} backdrop-blur shadow-md flex flex-col justify-between`}
                     >
-                      {/* Gradient Background */}
-                      <div className={`absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-300 bg-gradient-to-br ${item.color}`}></div>
-                      
-                      {/* Content */}
-                      <div className="relative z-10">
-                        <div className="text-4xl mb-4">{item.icon}</div>
-                        <h3 className="text-xl font-bold text-white mb-2">{item.title}</h3>
-                        <p className="text-gray-400 text-sm leading-relaxed">{item.desc}</p>
+                      <div>
+                        <span className="material-symbols-outlined text-[2rem] mb-2 block">
+                          {item.icon}
+                        </span>
+                        <h4 className="font-semibold text-sm text-on-surface mb-1">{item.title}</h4>
+                        <p className="text-xs text-on-surface-variant leading-relaxed">{item.desc}</p>
                       </div>
-
-                      {/* Shine effect */}
-                      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 shimmer-animation"></div>
                     </div>
                   ))}
                 </div>
@@ -205,27 +179,14 @@ function AppContent() {
           </div>
         )}
 
-        {activeTab === "upload" && (
-          <div className="mt-4">
-            <UploadPanel />
-          </div>
-        )}
+        {activeTab === "graph" && <GraphExplorer />}
 
-        {activeTab === "graph" && (
-          <div className="mt-4">
-            <GraphExplorer />
-          </div>
-        )}
+        {activeTab === "memory" && <MemoryPanel />}
 
-        {activeTab === "memory" && (
-          <div className="mt-4">
-            <MemoryPanel />
-          </div>
-        )}
+        {activeTab === "upload" && <UploadPanel />}
       </main>
-      </div>
-      
-      {/* Upload Notifications - visible across all tabs */}
+
+      {/* Global Background Upload Notifications */}
       <UploadNotification />
     </div>
   );

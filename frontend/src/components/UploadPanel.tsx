@@ -3,176 +3,253 @@ import { useUploadContext } from "../contexts/UploadContext";
 
 export const UploadPanel = () => {
   const { addTask, processQueue } = useUploadContext();
-  const [file, setFile] = useState<File | null>(null);
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
+  const [audioFile, setAudioFile] = useState<File | null>(null);
+
   const [title, setTitle] = useState("");
   const [authors, setAuthors] = useState("");
   const [year, setYear] = useState("");
   const [sourcePaperId, setSourcePaperId] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
 
-  const isAudio =
-    file?.type.startsWith("audio/") || file?.name.match(/\.(mp3|wav|m4a)$/i);
-
-  const handleUpload = async (e: React.FormEvent) => {
+  const handlePdfSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!file) return;
+    if (!pdfFile) return;
 
-    // Add task to queue
-    addTask(file, title, authors, year, isAudio ? sourcePaperId : undefined);
-
-    // Reset form
-    setFile(null);
+    addTask(pdfFile, title, authors, year);
+    setPdfFile(null);
     setTitle("");
     setAuthors("");
     setYear("");
+    setSuccessMsg("✓ PDF queued for ingestion! Processing runs in the background.");
+    setTimeout(() => setSuccessMsg(""), 4000);
+    processQueue();
+  };
+
+  const handleAudioSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!audioFile) return;
+
+    addTask(audioFile, title, "", "", sourcePaperId || undefined);
+    setAudioFile(null);
+    setTitle("");
     setSourcePaperId("");
-    setSuccessMsg("✓ Added to upload queue! Processing will continue even if you switch tabs.");
-
-    // Show success message for 3 seconds
-    setTimeout(() => setSuccessMsg(""), 3000);
-
-    // Trigger processing
+    setSuccessMsg("✓ Audio talk queued for Whisper transcription & ingestion!");
+    setTimeout(() => setSuccessMsg(""), 4000);
     processQueue();
   };
 
   return (
-    <div className="max-w-2xl mx-auto">
-      {/* Header */}
-      <div className="mb-8 text-center">
-        <h2 className="text-4xl md:text-5xl font-black tracking-tighter mb-2">
-          <span className="text-gradient">Ingest Content</span>
-        </h2>
-        <p className="text-gray-400">
-          Upload PDFs and audio files to build your knowledge graph. All uploads process in the background.
-        </p>
+    <div className="w-full space-y-6 text-on-surface">
+      {/* Top Utility Metadata Strip */}
+      <div className="w-full flex flex-col md:flex-row md:items-center justify-between gap-3 pb-2 border-b border-surface-container-highest/30">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-secondary animate-ping"></span>
+            <span className="font-semibold text-sm text-on-surface tracking-tight">
+              Multi-Modal Ingestion Pipeline
+            </span>
+          </div>
+          <span className="font-mono text-xs px-2 py-0.5 rounded bg-surface-container-high text-primary tracking-wide">
+            ETL-ORCHESTRATOR::ONLINE
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2 font-mono text-xs text-on-surface-variant">
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-surface-container">
+            <span className="material-symbols-outlined text-[14px] text-secondary">memory</span>
+            <span>Weaviate 1,024-dim</span>
+          </div>
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-surface-container">
+            <span className="material-symbols-outlined text-[14px] text-primary">lan</span>
+            <span>Neo4j Bolt: 7687</span>
+          </div>
+        </div>
       </div>
 
-      {/* Upload Form */}
-      <div className="glass-dark border border-white/10 rounded-3xl shadow-2xl shadow-blue-500/20 p-8">
-        <form onSubmit={handleUpload} className="flex flex-col gap-6">
-          {/* File Upload Area */}
-          <div className="relative">
-            <input
-              type="file"
-              accept="application/pdf,audio/*"
-              onChange={(e) => setFile(e.target.files?.[0] || null)}
-              className="hidden"
-              id="file-input"
-            />
-            <label
-              htmlFor="file-input"
-              className={`flex flex-col items-center justify-center p-12 rounded-2xl border-2 border-dashed transition-all cursor-pointer ${
-                file
-                  ? "bg-cyan-500/10 border-cyan-400/50"
-                  : "border-white/20 hover:border-cyan-400/50 hover:bg-cyan-500/5"
-              }`}
-            >
-              <div className="text-5xl mb-4">
-                {file ? (isAudio ? "🎵" : "📄") : "📁"}
-              </div>
-              {file ? (
-                <div className="text-center">
-                  <p className="font-semibold text-white">{file.name}</p>
-                  <p className="text-sm text-gray-400 mt-2">
-                    {(file.size / (1024 * 1024)).toFixed(2)} MB
-                  </p>
-                  <p className="text-xs text-cyan-400 mt-3 font-medium">
-                    Click to change file
-                  </p>
-                </div>
-              ) : (
-                <div className="text-center">
-                  <p className="font-semibold text-white mb-2">
-                    Drag & drop your file here
-                  </p>
-                  <p className="text-sm text-gray-400">
-                    or click to select a PDF or audio file
-                  </p>
-                </div>
-              )}
-            </label>
-          </div>
+      {successMsg && (
+        <div className="p-3 bg-secondary/15 border border-secondary/30 rounded-xl text-xs font-mono text-secondary flex items-center gap-2">
+          <span className="material-symbols-outlined text-[1rem]">check_circle</span>
+          <span>{successMsg}</span>
+        </div>
+      )}
 
-          {/* Title Input */}
+      {/* Dual Dropzone Area */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        {/* Left: Research Papers (PDF) */}
+        <div className="rounded-xl bg-surface-container/60 border border-surface-container-highest/50 p-5 flex flex-col justify-between shadow-xl">
           <div>
-            <label className="block text-sm font-semibold text-white mb-2">
-              Title (Optional)
-            </label>
-            <input
-              type="text"
-              placeholder="Auto-extracted from PDF or enter manually"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition-all text-white placeholder-gray-500"
-            />
-          </div>
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-lg bg-surface-container-high flex items-center justify-center text-primary shadow-sm">
+                  <span className="material-symbols-outlined text-[1.25rem]">description</span>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-sm text-on-surface">Research Papers & Preprints</h3>
+                  <p className="text-xs text-on-surface-variant">Extract text, math chunks, & figure bounding boxes</p>
+                </div>
+              </div>
+              <span className="font-mono text-[10px] px-2 py-0.5 rounded bg-surface-container-highest text-secondary-fixed uppercase">
+                PDF ≤ 100MB
+              </span>
+            </div>
 
-          {/* Conditional Fields */}
-          {file && !isAudio && (
-            <>
-              <div>
-                <label className="block text-sm font-semibold text-white mb-2">
-                  Authors (Optional)
+            <form onSubmit={handlePdfSubmit} className="space-y-3">
+              <div className="relative">
+                <input
+                  type="file"
+                  accept="application/pdf"
+                  onChange={(e) => setPdfFile(e.target.files?.[0] || null)}
+                  className="hidden"
+                  id="file-input-pdf"
+                />
+                <label
+                  htmlFor="file-input-pdf"
+                  className={`flex flex-col items-center justify-center p-6 rounded-xl border-2 border-dashed transition-all cursor-pointer ${
+                    pdfFile
+                      ? "bg-primary/10 border-primary"
+                      : "border-surface-container-highest/80 hover:border-primary/50 bg-surface-container-lowest/50"
+                  }`}
+                >
+                  <span className="material-symbols-outlined text-[2rem] text-primary mb-1">
+                    upload_file
+                  </span>
+                  {pdfFile ? (
+                    <div className="text-center font-mono">
+                      <p className="text-xs font-semibold text-on-surface truncate max-w-xs">{pdfFile.name}</p>
+                      <p className="text-[10px] text-outline mt-0.5">{(pdfFile.size / (1024 * 1024)).toFixed(2)} MB</p>
+                    </div>
+                  ) : (
+                    <div className="text-center">
+                      <p className="text-xs font-medium text-on-surface">Click or drag PDF preprint here</p>
+                      <p className="text-[10px] text-outline mt-0.5">PyMuPDF visual layout + BGE vectorization</p>
+                    </div>
+                  )}
                 </label>
+              </div>
+
+              <div>
                 <input
                   type="text"
-                  placeholder="Comma separated list of authors"
+                  placeholder="Paper title (optional, auto-extracted if empty)"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  className="w-full px-3 py-2 bg-surface-container-lowest border border-surface-container-highest/50 rounded-lg text-xs font-mono text-on-surface placeholder:text-outline focus:outline-none focus:border-primary"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <input
+                  type="text"
+                  placeholder="Authors (e.g. Thorne, Alvarez)"
                   value={authors}
                   onChange={(e) => setAuthors(e.target.value)}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition-all text-white placeholder-gray-500"
+                  className="w-full px-3 py-2 bg-surface-container-lowest border border-surface-container-highest/50 rounded-lg text-xs font-mono text-on-surface placeholder:text-outline focus:outline-none focus:border-primary"
                 />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-white mb-2">
-                  Publication Year (Optional)
-                </label>
                 <input
                   type="number"
-                  placeholder="e.g., 2024"
+                  placeholder="Year (e.g. 2024)"
                   value={year}
                   onChange={(e) => setYear(e.target.value)}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition-all text-white placeholder-gray-500"
+                  className="w-full px-3 py-2 bg-surface-container-lowest border border-surface-container-highest/50 rounded-lg text-xs font-mono text-on-surface placeholder:text-outline focus:outline-none focus:border-primary"
                 />
               </div>
-            </>
-          )}
 
-          {file && isAudio && (
-            <div>
-              <label className="block text-sm font-semibold text-white mb-2">
-                Source Paper ID (Optional)
-              </label>
-              <input
-                type="text"
-                placeholder="Link this audio to a paper"
-                value={sourcePaperId}
-                onChange={(e) => setSourcePaperId(e.target.value)}
-                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition-all text-white placeholder-gray-500"
-              />
+              <button
+                type="submit"
+                disabled={!pdfFile}
+                className="w-full py-2.5 rounded-lg bg-primary text-on-primary font-semibold text-xs shadow-md hover:brightness-110 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-1.5"
+              >
+                <span className="material-symbols-outlined text-[1rem]">publish</span>
+                <span>Ingest & Build Graph</span>
+              </button>
+            </form>
+          </div>
+        </div>
+
+        {/* Right: Conference Talks & Audio */}
+        <div className="rounded-xl bg-surface-container/60 border border-surface-container-highest/50 p-5 flex flex-col justify-between shadow-xl">
+          <div>
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-lg bg-surface-container-high flex items-center justify-center text-secondary shadow-sm">
+                  <span className="material-symbols-outlined text-[1.25rem]">graphic_eq</span>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-sm text-on-surface">Conference Talks & Lab Audio</h3>
+                  <p className="text-xs text-on-surface-variant">Whisper-v3 transcription with aligned timecodes</p>
+                </div>
+              </div>
+              <span className="font-mono text-[10px] px-2 py-0.5 rounded bg-surface-container-highest text-secondary-fixed uppercase">
+                WAV • MP3 • M4A
+              </span>
             </div>
-          )}
 
-          {/* Success Message */}
-          {successMsg && (
-            <div className="p-4 bg-green-500/10 border border-green-500/30 rounded-xl text-sm text-green-300 font-medium flex items-center gap-2">
-              <span>✓</span>
-              {successMsg}
-            </div>
-          )}
+            <form onSubmit={handleAudioSubmit} className="space-y-3">
+              <div className="relative">
+                <input
+                  type="file"
+                  accept="audio/*,.mp3,.wav,.m4a"
+                  onChange={(e) => setAudioFile(e.target.files?.[0] || null)}
+                  className="hidden"
+                  id="file-input-audio"
+                />
+                <label
+                  htmlFor="file-input-audio"
+                  className={`flex flex-col items-center justify-center p-6 rounded-xl border-2 border-dashed transition-all cursor-pointer ${
+                    audioFile
+                      ? "bg-secondary/10 border-secondary"
+                      : "border-surface-container-highest/80 hover:border-secondary/50 bg-surface-container-lowest/50"
+                  }`}
+                >
+                  <span className="material-symbols-outlined text-[2rem] text-secondary mb-1">
+                    mic
+                  </span>
+                  {audioFile ? (
+                    <div className="text-center font-mono">
+                      <p className="text-xs font-semibold text-on-surface truncate max-w-xs">{audioFile.name}</p>
+                      <p className="text-[10px] text-outline mt-0.5">{(audioFile.size / (1024 * 1024)).toFixed(2)} MB</p>
+                    </div>
+                  ) : (
+                    <div className="text-center">
+                      <p className="text-xs font-medium text-on-surface">Click or drag audio recording here</p>
+                      <p className="text-[10px] text-outline mt-0.5">Automated timestamping & speaker indexing</p>
+                    </div>
+                  )}
+                </label>
+              </div>
 
-          {/* Submit Button */}
-          <button
-            disabled={!file}
-            type="submit"
-            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold py-3 rounded-xl hover:shadow-lg hover:shadow-blue-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-105 flex items-center justify-center gap-2"
-          >
-            📤 <span>Upload & Queue</span>
-          </button>
+              <div>
+                <input
+                  type="text"
+                  placeholder="Audio session title (e.g. CVPR 2024 Keynote)"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  className="w-full px-3 py-2 bg-surface-container-lowest border border-surface-container-highest/50 rounded-lg text-xs font-mono text-on-surface placeholder:text-outline focus:outline-none focus:border-secondary"
+                />
+              </div>
 
-          <p className="text-xs text-gray-400 text-center">
-            Uploads are processed in parallel. You can switch tabs and uploads will continue.
-          </p>
-        </form>
+              <div>
+                <input
+                  type="text"
+                  placeholder="Related Paper Title or ID (Optional, links audio to paper)"
+                  value={sourcePaperId}
+                  onChange={(e) => setSourcePaperId(e.target.value)}
+                  className="w-full px-3 py-2 bg-surface-container-lowest border border-surface-container-highest/50 rounded-lg text-xs font-mono text-on-surface placeholder:text-outline focus:outline-none focus:border-secondary"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={!audioFile}
+                className="w-full py-2.5 rounded-lg bg-secondary text-on-secondary font-semibold text-xs shadow-md hover:brightness-110 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-1.5"
+              >
+                <span className="material-symbols-outlined text-[1rem]">transcribe</span>
+                <span>Transcribe & Ingest Audio</span>
+              </button>
+            </form>
+          </div>
+        </div>
       </div>
     </div>
   );

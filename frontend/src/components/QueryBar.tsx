@@ -1,122 +1,96 @@
 import React, { useState } from "react";
-import { Search } from "lucide-react";
 
-export const QueryBar = ({
-  onSearch,
-  loading,
-}: {
+interface QueryBarProps {
   onSearch: (txt: string) => void;
   loading: boolean;
-}) => {
+}
+
+const SEED_QUERIES = [
+  { text: "Table 1 indoor navigation sectors", color: "hover:text-secondary hover:shadow-[0_0_10px_rgba(79,219,200,0.15)]" },
+  { text: "Figure 1 ARKit SLAM flowchart", color: "hover:text-primary hover:shadow-[0_0_10px_rgba(192,193,255,0.15)]" },
+  { text: "What is Optimized Feature Experience (OFE)?", color: "hover:text-tertiary hover:shadow-[0_0_10px_rgba(221,183,255,0.15)]" },
+  { text: "NavMesh A* topological latency", color: "hover:text-secondary-fixed hover:shadow-[0_0_10px_rgba(113,248,228,0.15)]" },
+];
+
+export const QueryBar: React.FC<QueryBarProps> = ({ onSearch, loading }) => {
   const [text, setText] = useState("");
-  const [isFocused, setIsFocused] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (text.trim() && !loading) {
-      onSearch(text);
+      onSearch(text.trim());
     }
   };
 
-  const suggestions = [
-    { query: "What are the main concepts?", icon: "🎯" },
-    { query: "Show relationships between topics", icon: "🔗" },
-    { query: "Summarize key findings", icon: "📋" },
-  ];
+  const handleSelectSeed = (seed: string) => {
+    setText(seed);
+    onSearch(seed);
+  };
 
   return (
-    <form onSubmit={handleSubmit} className="w-full max-w-3xl space-y-6">
-      {/* Main Search Input */}
-      <div className="relative group">
-        {/* Glow effect */}
-        <div
-          className={`absolute -inset-1 bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-600 rounded-2xl blur-xl opacity-0 transition-all duration-500 ${
-            isFocused ? "opacity-75" : "opacity-0"
-          } group-hover:opacity-50`}
-        ></div>
+    <div className="w-full space-y-2">
+      <form onSubmit={handleSubmit} className="relative w-full">
+        <div className="relative bg-surface-container-low/90 backdrop-blur-2xl rounded-full p-2 pl-4 shadow-[0_8px_32px_-4px_rgba(0,0,0,0.5),0_0_24px_rgba(128,131,255,0.15)] flex flex-wrap md:flex-nowrap items-center gap-2 group focus-within:shadow-[0_0_36px_rgba(79,219,200,0.22)] transition-all border border-surface-container-high/60">
+          <div className="flex items-center gap-2 text-primary shrink-0 pl-1">
+            <span className="material-symbols-outlined text-[1.4rem] animate-pulse">
+              travel_explore
+            </span>
+          </div>
 
-        {/* Search Container */}
-        <div className="relative glass-dark border border-white/20 rounded-2xl overflow-hidden transition-all duration-300">
-          <div className="flex items-center px-6 py-4 gap-3">
-            {/* Search Icon */}
-            <Search className="w-5 h-5 text-cyan-400 flex-shrink-0" />
-
-            {/* Input */}
+          <div className="flex-1 min-w-[240px] relative">
             <input
               type="text"
               value={text}
               onChange={(e) => setText(e.target.value)}
-              onFocus={() => setIsFocused(true)}
-              onBlur={() => setIsFocused(false)}
-              placeholder="Ask anything about your documents..."
-              className="flex-1 outline-none bg-transparent text-white placeholder-gray-500 text-lg font-medium"
+              placeholder="Ask anything across papers, figures, and audio transcripts..."
+              className="w-full bg-transparent text-on-surface font-body-lg text-sm sm:text-base placeholder:text-outline focus:outline-none tracking-tight pr-14"
               disabled={loading}
             />
+            <span className="absolute right-2 top-1/2 -translate-y-1/2 font-mono text-[10px] text-outline px-1.5 py-0.5 rounded bg-surface-container-high/80 hidden sm:inline-block">
+              ⌘K
+            </span>
+          </div>
 
-            {/* Submit Button */}
+          <div className="flex items-center gap-1.5 shrink-0 pr-1 ml-auto">
             <button
               type="submit"
               disabled={loading || !text.trim()}
-              className="flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-blue-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 relative overflow-hidden group btn-glow"
+              className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-full bg-primary text-on-primary font-semibold text-xs sm:text-sm shadow-[0_0_18px_rgba(192,193,255,0.35)] hover:brightness-110 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
             >
               {loading ? (
                 <>
-                  <svg
-                    className="animate-spin h-5 w-5"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
-                  Searching
+                  <span className="material-symbols-outlined text-[1.125rem] animate-spin">
+                    sync
+                  </span>
+                  <span>Executing...</span>
                 </>
               ) : (
                 <>
-                  <Search className="w-5 h-5" />
-                  Search
+                  <span className="material-symbols-outlined text-[1.125rem]">bolt</span>
+                  <span>Execute</span>
                 </>
               )}
             </button>
           </div>
         </div>
-      </div>
+      </form>
 
-      {/* Quick Suggestions */}
-      {!text && (
-        <div className="space-y-3">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest pl-2">
-            Quick Suggestions:
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            {suggestions.map((item, idx) => (
-              <button
-                key={idx}
-                type="button"
-                onClick={() => setText(item.query)}
-                className="glass-dark border border-white/10 rounded-xl p-3 text-left hover:border-cyan-400/50 hover:bg-cyan-400/5 transition-all duration-200 group text-sm font-medium text-gray-300 hover:text-white"
-              >
-                <span className="text-lg mb-2 block group-hover:scale-110 transition-transform">
-                  {item.icon}
-                </span>
-                {item.query}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-    </form>
+      {/* Suggested Probes & Seed Vectors */}
+      <div className="flex items-center gap-1.5 overflow-x-auto py-1 text-on-surface-variant font-mono text-xs no-scrollbar">
+        <span className="text-outline uppercase tracking-wider text-[10px] mr-1 shrink-0 flex items-center gap-1">
+          <span className="material-symbols-outlined text-[0.875rem]">auto_fix_high</span> Seed Vectors:
+        </span>
+        {SEED_QUERIES.map((q, idx) => (
+          <button
+            key={idx}
+            type="button"
+            onClick={() => handleSelectSeed(q.text)}
+            className={`px-2.5 py-1 rounded-full bg-surface-container-low hover:bg-surface-container text-on-surface-variant transition-all whitespace-nowrap shrink-0 text-[11px] border border-surface-container-high/40 ${q.color}`}
+          >
+            {q.text}
+          </button>
+        ))}
+      </div>
+    </div>
   );
 };

@@ -1,4 +1,4 @@
-import { Fragment } from "react";
+import { Fragment, useState } from "react";
 import { SourceChip } from "./SourceChip";
 import { FigureCitation } from "./FigureCitation";
 import type { Claim, QueryResult } from "../types";
@@ -26,70 +26,100 @@ const markUnsupported = (answer: string, claims: Claim[]): Segment[] => {
   return parts;
 };
 
-// Render [E1]-style citations as small pills.
+// Render [E1]-style citations as small pills with smooth styling.
 const withCitations = (text: string) =>
   text.split(/(\[E\d+\])/g).map((piece, i) =>
     /^\[E\d+\]$/.test(piece) ? (
-      <span
+      <a
         key={i}
-        className="inline-block align-baseline mx-0.5 px-1.5 py-0.5 rounded bg-cyan-400/20 text-cyan-200 border border-cyan-400/30 text-xs font-bold"
+        href={`#citation-${piece.slice(1, -1)}`}
+        className="inline-flex items-center px-1.5 py-0.2 mx-0.5 rounded font-mono text-xs bg-primary/20 text-primary hover:bg-primary hover:text-on-primary transition-all font-semibold"
       >
-        {piece.slice(1, -1)}
-      </span>
+        {piece}
+      </a>
     ) : (
       <Fragment key={i}>{piece}</Fragment>
     ),
   );
-
-const Stat = ({ label, value }: { label: string; value: string | number }) => (
-  <div className="bg-white/5 rounded-lg px-3 py-2 border border-white/10">
-    <div className="text-[10px] uppercase tracking-widest text-gray-400">{label}</div>
-    <div className="text-white font-bold">{value}</div>
-  </div>
-);
 
 export const AnswerCard = ({ data }: { data: QueryResult }) => {
   const { claim_stats: stats, diagnostics: d } = data;
   const segments = markUnsupported(data.answer, data.claims);
   const fb = d.feedback;
   const checked = stats.supported + stats.unsupported;
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   return (
-    <div className="w-full glass-dark border border-white/10 rounded-3xl p-8 shadow-2xl shadow-blue-500/20">
-      {/* Header */}
-      <div className="mb-8 pb-6 border-b border-white/10">
-        <div className="flex items-center gap-3 mb-2 flex-wrap">
-          <span className="text-3xl">✨</span>
-          <h3 className="text-3xl font-black text-gradient">Answer</h3>
-          <div className="ml-auto flex gap-2 flex-wrap">
-            {stats.verified && checked > 0 && (
-              <span
-                className={`inline-block text-xs font-bold px-3 py-1 rounded-full border ${
+    <div className="w-full space-y-6">
+      {/* Synthesis Stage: Grounded Answer & NLI Verification Header */}
+      <section className="bg-surface-container-low/85 backdrop-blur-xl rounded-xl p-5 md:p-6 shadow-xl relative overflow-hidden border border-surface-container-highest/40">
+        {/* Top specular light ray */}
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-secondary/40 to-transparent"></div>
+
+        {/* Metric Status Header */}
+        <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-surface-container-highest/30">
+          <div className="flex items-center gap-2.5 flex-wrap">
+            {stats.verified && checked > 0 ? (
+              <div
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full font-mono text-xs font-semibold uppercase tracking-wider ${
                   stats.unsupported === 0
-                    ? "bg-emerald-400/20 text-emerald-300 border-emerald-400/30"
-                    : "bg-amber-400/20 text-amber-300 border-amber-400/30"
+                    ? "bg-secondary-container/20 text-secondary-fixed shadow-[0_0_12px_rgba(79,219,200,0.2)]"
+                    : "bg-error-container/20 text-error shadow-[0_0_12px_rgba(255,180,171,0.2)]"
                 }`}
               >
-                {stats.unsupported === 0
-                  ? `✓ All ${stats.supported} claims verified`
-                  : `${stats.supported} supported · ${stats.unsupported} unsupported`}
-              </span>
+                <span className="material-symbols-outlined text-[1rem]">verified_user</span>
+                <span>
+                  {stats.unsupported === 0
+                    ? `All ${stats.supported} Claims Verified`
+                    : `${stats.supported} Verified · ${stats.unsupported} Unsupported`}
+                </span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/20 text-primary font-mono text-xs font-semibold">
+                <span className="material-symbols-outlined text-[1rem]">auto_awesome</span>
+                <span>Evidence-Based Synthesis</span>
+              </div>
             )}
-            <span className="inline-block text-xs font-bold bg-cyan-400/20 text-cyan-300 px-3 py-1 rounded-full border border-cyan-400/30">
-              Evidence-Based
-            </span>
-          </div>
-        </div>
-      </div>
 
-      {/* Answer */}
-      <div className="mb-10 p-8 bg-gradient-to-br from-white/10 to-white/5 rounded-2xl border border-white/10 backdrop-blur">
-        <p className="text-white text-lg leading-relaxed whitespace-pre-wrap font-medium">
+            <div className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-surface-container-high font-mono text-xs text-on-surface-variant">
+              <span className="material-symbols-outlined text-[0.875rem] text-primary">psychology</span>
+              <span>{d.system || "ResearchOS Agentic"}</span>
+            </div>
+
+            {d.alpha !== null && (
+              <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-surface-container font-mono text-xs text-secondary">
+                <span className="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"></span>
+                <span>α = {d.alpha.toFixed(3)}</span>
+              </div>
+            )}
+          </div>
+
+          {data.claims.length > 0 && (
+            <button
+              onClick={() => setDrawerOpen(!drawerOpen)}
+              type="button"
+              className="flex items-center gap-1 px-2.5 py-1 rounded bg-surface-container hover:bg-surface-container-high text-primary hover:text-on-surface transition-colors font-mono text-xs"
+            >
+              <span className="material-symbols-outlined text-[0.95rem]">fact_check</span>
+              <span>Claim Audit ({stats.supported}/{checked})</span>
+              <span
+                className={`material-symbols-outlined text-[0.85rem] transition-transform duration-200 ${
+                  drawerOpen ? "rotate-180" : ""
+                }`}
+              >
+                expand_more
+              </span>
+            </button>
+          )}
+        </div>
+
+        {/* Scientific Prose with Citations */}
+        <div className="py-4 text-on-surface font-body-lg text-sm sm:text-base leading-relaxed whitespace-pre-wrap">
           {segments.map((s, i) =>
             s.unsupported ? (
               <mark
                 key={i}
-                className="bg-amber-400/25 text-amber-100 rounded px-1 underline decoration-dotted decoration-amber-300"
+                className="bg-error-container/25 text-error px-1 py-0.5 rounded font-medium underline decoration-dotted decoration-error"
                 title="The verification pass could not find support for this claim in the cited evidence"
               >
                 {withCitations(s.text)}
@@ -98,113 +128,192 @@ export const AnswerCard = ({ data }: { data: QueryResult }) => {
               <Fragment key={i}>{withCitations(s.text)}</Fragment>
             ),
           )}
-        </p>
+        </div>
+
         {stats.unsupported > 0 && (
-          <p className="mt-4 text-sm text-amber-300">
-            ⚠ Highlighted sentences are not supported by the cited evidence. Treat them with caution.
+          <p className="mt-2 text-xs text-error font-mono flex items-center gap-1.5">
+            <span className="material-symbols-outlined text-[0.875rem]">warning</span>
+            Highlighted sentences could not be fully supported by retrieved evidence chunks.
           </p>
         )}
-      </div>
 
-      {/* Sources and Figures Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="glass-dark border border-white/10 rounded-2xl p-6 overflow-hidden">
-          <div className="flex items-center gap-3 mb-5">
-            <span className="text-2xl">📚</span>
-            <h4 className="font-black text-white uppercase tracking-widest text-sm">Evidence</h4>
-            {data.sources.length > 0 && (
-              <span className="ml-auto bg-blue-500/30 text-blue-200 text-xs font-bold px-3 py-1.5 rounded-full border border-blue-500/50">
-                {data.sources.length}
-              </span>
-            )}
+        {/* NLI Claim Verification Drawer */}
+        {drawerOpen && data.claims.length > 0 && (
+          <div className="mt-4 pt-4 border-t border-surface-container-highest/30 space-y-2 animate-fadeIn">
+            <div className="text-[11px] font-mono uppercase tracking-wider text-outline mb-2 flex items-center justify-between">
+              <span>Natural Language Inference (NLI) Verification</span>
+              <span>Premise Matrix</span>
+            </div>
+            {data.claims.map((claim, idx) => (
+              <div
+                key={idx}
+                className="p-2.5 rounded-lg bg-surface-container/70 flex flex-col md:flex-row md:items-center justify-between gap-2 text-xs hover:bg-surface-container transition-colors"
+              >
+                <div className="flex items-start gap-2 min-w-0">
+                  <span
+                    className={`material-symbols-outlined text-[1.125rem] shrink-0 mt-0.5 ${
+                      claim.verdict === "supported" ? "text-secondary" : "text-error"
+                    }`}
+                  >
+                    {claim.verdict === "supported" ? "check_circle" : "cancel"}
+                  </span>
+                  <div>
+                    <span className="text-on-surface font-medium">Claim {idx + 1}:</span>
+                    <span className="text-on-surface-variant ml-1 font-mono">"{claim.text}"</span>
+                    {claim.evidence_ids?.length > 0 && (
+                      <span className="text-outline text-[11px] block md:inline md:ml-2">
+                        Evidence: {claim.evidence_ids.join(", ")}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0 self-end md:self-auto font-mono text-[11px]">
+                  <span
+                    className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold ${
+                      claim.verdict === "supported"
+                        ? "bg-secondary/15 text-secondary"
+                        : "bg-error-container/30 text-error"
+                    }`}
+                  >
+                    {claim.verdict}
+                  </span>
+                </div>
+              </div>
+            ))}
           </div>
-          <div className="flex flex-col gap-3">
+        )}
+      </section>
+
+      {/* Multi-Modal Evidence Split View */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+        {/* Left Column: Text & Audio Modality (7 cols) */}
+        <div className="lg:col-span-7 space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-primary text-[1.125rem]">
+                library_books
+              </span>
+              <h4 className="font-semibold text-sm text-on-surface">Text & Audio Evidence</h4>
+            </div>
+            <span className="font-mono text-xs text-outline">
+              {data.sources.length} retrieved anchors
+            </span>
+          </div>
+
+          <div className="space-y-3">
             {data.sources.length > 0 ? (
               data.sources.map((s) => <SourceChip key={s.evidence_id} source={s} />)
             ) : (
-              <p className="text-gray-400 italic text-center py-6">No text or audio evidence passed the relevance cutoff</p>
+              <div className="p-6 rounded-xl bg-surface-container/40 text-center text-xs text-outline">
+                No text or audio evidence passed relevance cutoff
+              </div>
             )}
           </div>
         </div>
 
-        <div className="glass-dark border border-white/10 rounded-2xl p-6 overflow-hidden">
-          <div className="flex items-center gap-3 mb-5">
-            <span className="text-2xl">🖼️</span>
-            <h4 className="font-black text-white uppercase tracking-widest text-sm">Visual Evidence</h4>
-            {data.figures.length > 0 && (
-              <span className="ml-auto bg-purple-500/30 text-purple-200 text-xs font-bold px-3 py-1.5 rounded-full border border-purple-500/50">
-                {data.figures.length}
+        {/* Right Column: Visual Evidence (5 cols) */}
+        <div className="lg:col-span-5 space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-secondary text-[1.125rem]">
+                image_search
               </span>
-            )}
+              <h4 className="font-semibold text-sm text-on-surface">Visual Evidence</h4>
+            </div>
+            <span className="font-mono text-xs text-outline">
+              {data.figures.length} figures
+            </span>
           </div>
-          <div className="flex flex-col gap-4">
+
+          <div className="space-y-3">
             {data.figures.length > 0 ? (
               data.figures.map((f) => <FigureCitation key={f.evidence_id} figure={f} />)
             ) : (
-              <p className="text-gray-400 italic text-center py-6">No visual evidence retrieved</p>
+              <div className="p-6 rounded-xl bg-surface-container/40 text-center text-xs text-outline">
+                No visual evidence figures retrieved
+              </div>
             )}
           </div>
         </div>
       </div>
 
-      {/* Graph context */}
+      {/* Reached through Knowledge Graph */}
       {((data.graph_context?.concepts?.length ?? 0) > 0 || (data.graph_context?.related_papers?.length ?? 0) > 0) && (
-        <div className="mt-6 glass-dark border border-white/10 rounded-2xl p-5">
-          <h4 className="font-black text-white uppercase tracking-widest text-xs mb-3">Reached through the knowledge graph</h4>
-          <div className="flex flex-wrap gap-2">
-            {(data.graph_context?.concepts ?? []).slice(0, 20).map((c) => (
-              <span key={c} className="text-xs px-2.5 py-1 rounded-full bg-teal-500/20 text-teal-200 border border-teal-400/30">
+        <div className="p-4 rounded-xl bg-surface-container/60 border border-surface-container-highest/40">
+          <div className="flex items-center gap-2 mb-2 text-xs font-mono uppercase text-outline">
+            <span className="material-symbols-outlined text-[1rem] text-secondary">hub</span>
+            <span>Reached Through Knowledge Graph Synapses</span>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {(data.graph_context?.concepts ?? []).slice(0, 16).map((c) => (
+              <span
+                key={c}
+                className="text-xs px-2.5 py-1 rounded-full bg-secondary-container/15 text-secondary border border-secondary/20 font-mono"
+              >
                 {c}
               </span>
             ))}
             {(data.graph_context?.related_papers ?? []).map((p) => (
-              <span key={p} className="text-xs px-2.5 py-1 rounded-full bg-purple-500/20 text-purple-200 border border-purple-400/30">
-                cited paper: {p}
+              <span
+                key={p}
+                className="text-xs px-2.5 py-1 rounded-full bg-tertiary/15 text-tertiary border border-tertiary/20 font-mono"
+              >
+                paper: {p}
               </span>
             ))}
           </div>
         </div>
       )}
 
-      {/* How this answer was produced */}
-      <details className="mt-6 group">
-        <summary className="cursor-pointer text-xs font-semibold text-gray-400 hover:text-white select-none">
-          How this answer was retrieved ({d.system}
-          {d.alpha !== null && ` · α=${d.alpha}`})
+      {/* Retrieval Diagnostics & Telemetry Accordion */}
+      <details className="p-3.5 rounded-xl bg-surface-container-low/70 border border-surface-container-highest/30 group">
+        <summary className="cursor-pointer text-xs font-mono text-outline hover:text-on-surface select-none flex items-center justify-between">
+          <span className="flex items-center gap-1.5">
+            <span className="material-symbols-outlined text-[0.875rem]">tune</span>
+            Telemetry & Diagnostics ({d.system}
+            {d.alpha !== null && ` · α=${d.alpha.toFixed(3)}`})
+          </span>
+          <span className="text-[10px] text-outline group-open:rotate-180 transition-transform">▼</span>
         </summary>
-        <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3">
-          <Stat label="BM25 hits" value={d.bm25_hits} />
-          <Stat label="Dense hits" value={d.dense_hits} />
-          <Stat label="Seeds" value={d.seeds} />
-          <Stat label="Graph reached" value={d.graph_reached} />
-          <Stat label="Candidates" value={d.candidates} />
-          <Stat label="Above cutoff" value={d.above_cutoff} />
-          <Stat label="Edges updated" value={fb.applied ? (fb.edges_updated ?? 0) : "—"} />
-          <Stat label="Edges pruned" value={fb.applied ? (fb.edges_pruned ?? 0) : "—"} />
+        <div className="mt-3 pt-3 border-t border-surface-container-highest/20 grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-mono">
+          <div className="p-2 rounded bg-surface-container/70">
+            <div className="text-[10px] uppercase text-outline">BM25 Hits</div>
+            <div className="text-on-surface font-bold mt-0.5">{d.bm25_hits}</div>
+          </div>
+          <div className="p-2 rounded bg-surface-container/70">
+            <div className="text-[10px] uppercase text-outline">Dense Hits</div>
+            <div className="text-primary font-bold mt-0.5">{d.dense_hits}</div>
+          </div>
+          <div className="p-2 rounded bg-surface-container/70">
+            <div className="text-[10px] uppercase text-outline">Graph Reached</div>
+            <div className="text-secondary font-bold mt-0.5">{d.graph_reached}</div>
+          </div>
+          <div className="p-2 rounded bg-surface-container/70">
+            <div className="text-[10px] uppercase text-outline">Above Cutoff</div>
+            <div className="text-on-surface font-bold mt-0.5">{d.above_cutoff}</div>
+          </div>
         </div>
-        {fb.applied && fb.alpha_before !== undefined && fb.alpha_after !== undefined && (
-          <p className="mt-3 text-xs text-gray-400">
-            Fusion weight α (0 = BM25 only, 1 = dense only): {fb.alpha_before} → {fb.alpha_after}
-          </p>
-        )}
-        <p className="mt-2 text-xs text-gray-500">
-          {Object.entries(d.timings)
-            .map(([k, v]) => `${k.replace("_ms", "")} ${v} ms`)
-            .join(" · ")}
-        </p>
-        {d.notes.map((n) => (
-          <p key={n} className="mt-2 text-xs text-amber-300">
-            ⚠ {n}
-          </p>
-        ))}
-      </details>
 
-      <div className="mt-8 pt-6 border-t border-white/10 flex items-center justify-between text-xs text-gray-400 font-semibold">
-        <span>✓ Answered only from numbered evidence</span>
-        <span>
-          {data.sources.length} sources • {data.figures.length} figures
-        </span>
-      </div>
+        {fb.applied && (
+          <div className="mt-2 text-xs font-mono text-secondary flex items-center gap-2">
+            <span>Feedback Synapse Update:</span>
+            <span>{fb.edges_updated ?? 0} updated</span>
+            <span>•</span>
+            <span className="text-error">{fb.edges_pruned ?? 0} pruned</span>
+            {fb.alpha_before !== undefined && fb.alpha_after !== undefined && (
+              <span>• α: {fb.alpha_before} → {fb.alpha_after}</span>
+            )}
+          </div>
+        )}
+
+        <div className="mt-2 text-[11px] font-mono text-outline flex items-center gap-2 flex-wrap">
+          {Object.entries(d.timings).map(([k, v]) => (
+            <span key={k}>
+              {k.replace("_ms", "")}: <strong className="text-on-surface">{v}ms</strong>
+            </span>
+          ))}
+        </div>
+      </details>
     </div>
   );
 };

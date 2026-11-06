@@ -8,10 +8,29 @@ export const FigureCitation = ({ figure }: { figure: FigureRef }) => {
 
   return (
     <>
-      <div className="bg-white rounded-lg overflow-hidden flex flex-col shadow-md hover:shadow-lg transition-all duration-200 border border-gray-200 hover:border-indigo-300 max-w-sm">
-        {/* The stored crop: the figure plus its caption, cut from the page by bounding box */}
+      <div className="p-3.5 rounded-xl bg-surface-container/60 hover:bg-surface-container transition-all border border-surface-container-highest/50 flex flex-col group">
+        <div className="flex items-start justify-between gap-2 mb-2">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="px-1.5 py-0.5 rounded bg-surface-container-high text-on-surface font-mono text-xs font-semibold">
+                {figure.evidence_id}
+              </span>
+              <span className="text-xs font-semibold text-on-surface line-clamp-1" title={figure.paper_title}>
+                {figure.paper_title}
+              </span>
+            </div>
+            <div className="font-mono text-[11px] text-outline mt-0.5">
+              Page {figure.page}
+            </div>
+          </div>
+          <span className="px-2 py-0.5 rounded bg-secondary/15 text-secondary font-mono text-xs shrink-0 font-medium">
+            {(figure.score * 100).toFixed(0)}%
+          </span>
+        </div>
+
+        {/* Thumbnail Preview with Click-to-Zoom */}
         <div
-          className="bg-gradient-to-br from-gray-100 to-gray-200 h-44 w-full flex items-center justify-center overflow-hidden cursor-zoom-in relative group"
+          className="w-full bg-surface-container-lowest rounded-lg p-2 my-1.5 overflow-hidden flex items-center justify-center cursor-pointer group-hover:border-primary/40 border border-transparent transition-all h-40 relative"
           onClick={() => setIsOpen(true)}
         >
           <img
@@ -19,45 +38,37 @@ export const FigureCitation = ({ figure }: { figure: FigureRef }) => {
             alt={figure.caption}
             className="max-h-full max-w-full object-contain transition-transform group-hover:scale-105"
           />
-          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
-            <span className="opacity-0 group-hover:opacity-100 transition-opacity text-white text-sm font-semibold">
-              🔍 View Full
+          <div className="absolute inset-0 bg-surface/0 group-hover:bg-surface/30 transition-colors flex items-center justify-center">
+            <span className="opacity-0 group-hover:opacity-100 transition-opacity px-2 py-1 rounded bg-surface-container-high text-xs font-mono text-on-surface shadow-md flex items-center gap-1">
+              <span className="material-symbols-outlined text-[0.875rem]">zoom_in</span> Zoom
             </span>
           </div>
         </div>
 
-        <div className="p-4 bg-gradient-to-br from-white to-blue-50 border-t border-gray-200">
-          <p className="font-semibold text-sm text-gray-900 truncate" title={figure.paper_title}>
-            {figure.paper_title}
-          </p>
-          <p className="text-xs text-gray-600 mt-2 line-clamp-3 leading-relaxed italic" title={figure.caption}>
+        {figure.caption && (
+          <p className="text-xs text-on-surface-variant line-clamp-2 leading-relaxed italic mt-1" title={figure.caption}>
             {figure.caption}
           </p>
-          <div className="flex flex-wrap gap-2 items-center mt-3">
-            <span className="text-xs font-bold bg-blue-100 text-blue-700 px-2.5 py-1 rounded-full">
-              [{figure.evidence_id}]
+        )}
+
+        {figure.cited && (
+          <div className="mt-2 flex items-center">
+            <span className="px-1.5 py-0.5 rounded bg-secondary text-on-secondary text-[10px] uppercase font-bold">
+              cited in answer
             </span>
-            <span className="text-xs font-bold bg-amber-100 text-amber-700 px-2.5 py-1 rounded-full">
-              📄 Page {figure.page}
-            </span>
-            <span className="text-xs text-gray-500">Relevance {(figure.score * 100).toFixed(0)}%</span>
-            {figure.cited && (
-              <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-indigo-600 text-white">
-                cited in answer
-              </span>
-            )}
           </div>
-        </div>
+        )}
       </div>
 
+      {/* Modal Zoom View */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-4 cursor-zoom-out"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 cursor-zoom-out"
           onClick={() => setIsOpen(false)}
         >
-          <div className="relative max-w-[90vw] max-h-[90vh] flex flex-col">
+          <div className="relative max-w-[90vw] max-h-[90vh] flex flex-col bg-surface-container-low border border-surface-container-highest p-4 rounded-2xl shadow-2xl">
             <button
-              className="absolute -top-10 right-0 bg-white text-black w-10 h-10 rounded-full flex items-center justify-center font-bold text-xl shadow-lg hover:bg-gray-200 transition-colors"
+              className="absolute -top-3 -right-3 bg-surface-container-high text-on-surface hover:text-error w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shadow-lg border border-surface-container-highest transition-colors"
               onClick={(e) => {
                 e.stopPropagation();
                 setIsOpen(false);
@@ -66,21 +77,20 @@ export const FigureCitation = ({ figure }: { figure: FigureRef }) => {
             >
               ✕
             </button>
-            <img
-              src={imgUrl}
-              className="w-full h-full object-contain bg-white rounded shadow-2xl max-h-[70vh]"
-              alt="Full resolution view"
-              onClick={(e) => e.stopPropagation()}
-            />
-            <div className="mt-4 bg-white rounded-lg p-4 shadow-lg max-w-2xl">
-              <p className="font-semibold text-gray-900 mb-2">{figure.paper_title}</p>
-              <p className="text-sm text-gray-700">{figure.caption}</p>
+            <div className="w-full max-h-[70vh] flex items-center justify-center overflow-hidden bg-surface-container-lowest rounded-lg p-2">
+              <img
+                src={imgUrl}
+                className="max-h-[68vh] max-w-full object-contain"
+                alt="Full resolution figure"
+                onClick={(e) => e.stopPropagation()}
+              />
+            </div>
+            <div className="mt-3 text-left">
+              <p className="font-semibold text-on-surface text-sm mb-1">{figure.paper_title}</p>
+              <p className="text-xs text-on-surface-variant leading-relaxed">{figure.caption}</p>
               {figure.description && (
-                <p className="text-sm text-gray-500 mt-2 italic">{figure.description}</p>
+                <p className="text-xs text-outline mt-1.5 font-mono">{figure.description}</p>
               )}
-              <span className="inline-block mt-3 text-xs font-bold bg-amber-100 text-amber-700 px-2.5 py-1 rounded-full">
-                Page {figure.page}
-              </span>
             </div>
           </div>
         </div>
