@@ -148,16 +148,16 @@ export const AnswerCard = ({ data }: { data: QueryResult }) => {
       </div>
 
       {/* Graph context */}
-      {(data.graph_context.concepts.length > 0 || data.graph_context.related_papers.length > 0) && (
+      {((data.graph_context?.concepts?.length ?? 0) > 0 || (data.graph_context?.related_papers?.length ?? 0) > 0) && (
         <div className="mt-6 glass-dark border border-white/10 rounded-2xl p-5">
           <h4 className="font-black text-white uppercase tracking-widest text-xs mb-3">Reached through the knowledge graph</h4>
           <div className="flex flex-wrap gap-2">
-            {data.graph_context.concepts.slice(0, 20).map((c) => (
+            {(data.graph_context?.concepts ?? []).slice(0, 20).map((c) => (
               <span key={c} className="text-xs px-2.5 py-1 rounded-full bg-teal-500/20 text-teal-200 border border-teal-400/30">
                 {c}
               </span>
             ))}
-            {data.graph_context.related_papers.map((p) => (
+            {(data.graph_context?.related_papers ?? []).map((p) => (
               <span key={p} className="text-xs px-2.5 py-1 rounded-full bg-purple-500/20 text-purple-200 border border-purple-400/30">
                 cited paper: {p}
               </span>

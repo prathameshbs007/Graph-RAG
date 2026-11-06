@@ -119,6 +119,7 @@ def ingest_pdf(
                     "bbox": f["bbox"],
                     "file_path": f["file_path"],
                     "ocr_text": f["ocr_text"],
+                    "section": f.get("section"),
                 }
             )
 
@@ -127,7 +128,7 @@ def ingest_pdf(
             for f in figures:
                 f["description"] = figure_describer.describe_figure(f["file_path"], f["caption"])
         for f in figures:
-            parts = [f["caption"], f.get("description") or f.get("ocr_text") or ""]
+            parts = [f.get("section") or "", f["caption"], f.get("description") or f.get("ocr_text") or ""]
             f["chunk_text"] = " ".join(p for p in parts if p).strip()
 
         all_items = items + figures
@@ -161,7 +162,7 @@ def ingest_pdf(
                 "Paper",
                 paper_id,
                 "Figure",
-                [{"id": f["chunk_id"], "modality": "image", "page": f["page"], "chunk_index": None, "section": None}
+                [{"id": f["chunk_id"], "modality": "image", "page": f["page"], "chunk_index": None, "section": f.get("section")}
                  for f in figures],
             )
             edges = graph_db.add_concepts(concepts.mentions, concepts.relations)

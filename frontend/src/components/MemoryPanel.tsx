@@ -152,12 +152,12 @@ export const MemoryPanel = () => {
                   <td className={e.kind === "prune" ? "text-red-300 font-bold" : e.kind === "alpha" ? "text-sky-300" : ""}>
                     {e.kind}
                   </td>
-                  <td className="max-w-[18rem] truncate" title={`${e.src} → ${e.dst}`}>
-                    {e.edge_type}: {e.src.slice(0, 18)} → {e.dst.slice(0, 18)}
+                  <td className="max-w-[18rem] truncate" title={`${e.src ?? ""} → ${e.dst ?? ""}`}>
+                    {e.edge_type ?? "edge"}: {(e.src ?? "").slice(0, 18)} → {(e.dst ?? "").slice(0, 18)}
                   </td>
-                  <td className="text-right">{e.old_weight.toFixed(3)}</td>
-                  <td className="text-right">{e.new_weight.toFixed(3)}</td>
-                  <td className="text-right">{e.score.toFixed(2)}</td>
+                  <td className="text-right">{(e.old_weight ?? 0).toFixed(3)}</td>
+                  <td className="text-right">{(e.new_weight ?? 0).toFixed(3)}</td>
+                  <td className="text-right">{(e.score ?? 0).toFixed(2)}</td>
                   <td className="pl-3 max-w-[16rem] truncate" title={e.query}>
                     {e.query}
                   </td>

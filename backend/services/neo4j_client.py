@@ -220,7 +220,7 @@ class Neo4jDB:
         if not seed_ids:
             return {}
         rng = rng or random.Random()
-        tau = settings.EDGE_TRAVERSE_MIN if min_weight is None else min_weight
+        tau = min(settings.EDGE_TRAVERSE_MIN if min_weight is None else min_weight, settings.PRUNE_BELOW)
         eps = settings.EXPLORE_PROB if explore_prob is None else explore_prob
         fanout = fanout or settings.GRAPH_FANOUT
         per_node = per_node or settings.GRAPH_RESOLVE_PER_NODE

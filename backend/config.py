@@ -62,7 +62,7 @@ class Settings(BaseSettings):
     CANDIDATE_POOL_MAX: int = 50
     FUSION: str = "alpha"  # "alpha" (weighted scores) or "rrf"
     RRF_K: int = 60
-    EDGE_TRAVERSE_MIN: float = 0.3
+    EDGE_TRAVERSE_MIN: float = 0.2
     EXPLORE_PROB: float = 0.05
 
     # ------------------------------------------------ Module 3: feedback
@@ -71,7 +71,7 @@ class Settings(BaseSettings):
     CONTEXT_SIZE: int = 5  # items passed to the generator (k)
     EDGE_LR: float = 0.1
     PRUNE_MIN_VISITS: int = 5
-    PRUNE_BELOW: float = 0.2
+    PRUNE_BELOW: float = 0.28
     ALPHA_INIT: float = 0.5
     ALPHA_RATE: float = 0.05
     ALPHA_MIN: float = 0.2

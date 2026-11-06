@@ -504,6 +504,7 @@ def extract_pdf_data(file_path: str, paper_id: str, output_dir: str) -> Extracte
                     "bbox": [round(v, 1) for v in (crop.x0, crop.y0, crop.x1, crop.y1)],
                     "file_path": path,
                     "ocr_text": figure_text,
+                    "section": section,
                 }
             )
             consumed.add(idx)  # the caption now lives with its figure
