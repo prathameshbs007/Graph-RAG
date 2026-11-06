@@ -8,7 +8,6 @@ interface Segment {
   unsupported: boolean;
 }
 
-// Split the answer so claims the verification pass could not support can be highlighted.
 const markUnsupported = (answer: string, claims: Claim[]): Segment[] => {
   let parts: Segment[] = [{ text: answer, unsupported: false }];
   for (const c of claims.filter((c) => c.verdict === "unsupported")) {
@@ -26,14 +25,13 @@ const markUnsupported = (answer: string, claims: Claim[]): Segment[] => {
   return parts;
 };
 
-// Render [E1]-style citations as small pills with smooth styling.
 const withCitations = (text: string) =>
   text.split(/(\[E\d+\])/g).map((piece, i) =>
     /^\[E\d+\]$/.test(piece) ? (
       <a
         key={i}
         href={`#citation-${piece.slice(1, -1)}`}
-        className="inline-flex items-center px-1.5 py-0.2 mx-0.5 rounded font-mono text-xs bg-primary/20 text-primary hover:bg-primary hover:text-on-primary transition-all font-semibold"
+        className="inline-flex items-center px-1.5 py-0.2 mx-0.5 rounded font-mono text-xs bg-primary/20 text-primary hover:bg-primary hover:text-on-primary transition-all font-semibold cursor-pointer border border-primary/30"
       >
         {piece}
       </a>
@@ -52,7 +50,7 @@ export const AnswerCard = ({ data }: { data: QueryResult }) => {
   return (
     <div className="w-full space-y-6">
       {/* Synthesis Stage: Grounded Answer & NLI Verification Header */}
-      <section className="bg-surface-container-low/85 backdrop-blur-xl rounded-xl p-5 md:p-6 shadow-xl relative overflow-hidden border border-surface-container-highest/40">
+      <section className="bg-surface-container-low/90 backdrop-blur-xl rounded-2xl p-6 shadow-xl relative overflow-hidden border border-surface-container-highest/40">
         {/* Top specular light ray */}
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-secondary/40 to-transparent"></div>
 
@@ -61,10 +59,10 @@ export const AnswerCard = ({ data }: { data: QueryResult }) => {
           <div className="flex items-center gap-2.5 flex-wrap">
             {stats.verified && checked > 0 ? (
               <div
-                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full font-mono text-xs font-semibold uppercase tracking-wider ${
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-full font-mono text-xs font-semibold uppercase tracking-wider ${
                   stats.unsupported === 0
-                    ? "bg-secondary-container/20 text-secondary-fixed shadow-[0_0_12px_rgba(79,219,200,0.2)]"
-                    : "bg-error-container/20 text-error shadow-[0_0_12px_rgba(255,180,171,0.2)]"
+                    ? "bg-secondary-container/20 text-secondary-fixed shadow-[0_0_12px_rgba(79,219,200,0.2)] border border-secondary/30"
+                    : "bg-error-container/20 text-error shadow-[0_0_12px_rgba(255,180,171,0.2)] border border-error/30"
                 }`}
               >
                 <span className="material-symbols-outlined text-[1rem]">verified_user</span>
@@ -75,19 +73,19 @@ export const AnswerCard = ({ data }: { data: QueryResult }) => {
                 </span>
               </div>
             ) : (
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/20 text-primary font-mono text-xs font-semibold">
+              <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/20 text-primary font-mono text-xs font-semibold border border-primary/30">
                 <span className="material-symbols-outlined text-[1rem]">auto_awesome</span>
-                <span>Evidence-Based Synthesis</span>
+                <span>Evidence Synthesis</span>
               </div>
             )}
 
-            <div className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-surface-container-high font-mono text-xs text-on-surface-variant">
+            <div className="flex items-center gap-1.5 px-3 py-1 rounded-md bg-surface-container-high font-mono text-xs text-on-surface-variant border border-surface-container-highest/50">
               <span className="material-symbols-outlined text-[0.875rem] text-primary">psychology</span>
               <span>{d.system || "ResearchOS Agentic"}</span>
             </div>
 
             {d.alpha !== null && (
-              <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-surface-container font-mono text-xs text-secondary">
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-surface-container font-mono text-xs text-secondary border border-secondary/20">
                 <span className="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"></span>
                 <span>α = {d.alpha.toFixed(3)}</span>
               </div>
@@ -98,10 +96,10 @@ export const AnswerCard = ({ data }: { data: QueryResult }) => {
             <button
               onClick={() => setDrawerOpen(!drawerOpen)}
               type="button"
-              className="flex items-center gap-1 px-2.5 py-1 rounded bg-surface-container hover:bg-surface-container-high text-primary hover:text-on-surface transition-colors font-mono text-xs"
+              className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-surface-container hover:bg-surface-container-high text-primary hover:text-on-surface transition-colors font-mono text-xs border border-surface-container-highest/50 cursor-pointer"
             >
               <span className="material-symbols-outlined text-[0.95rem]">fact_check</span>
-              <span>Claim Audit ({stats.supported}/{checked})</span>
+              <span>Audit Chain ({stats.supported}/{checked})</span>
               <span
                 className={`material-symbols-outlined text-[0.85rem] transition-transform duration-200 ${
                   drawerOpen ? "rotate-180" : ""
@@ -114,7 +112,7 @@ export const AnswerCard = ({ data }: { data: QueryResult }) => {
         </div>
 
         {/* Scientific Prose with Citations */}
-        <div className="py-4 text-on-surface font-body-lg text-sm sm:text-base leading-relaxed whitespace-pre-wrap">
+        <div className="py-5 text-on-surface text-base md:text-[1.05rem] leading-relaxed whitespace-pre-wrap font-sans">
           {segments.map((s, i) =>
             s.unsupported ? (
               <mark
@@ -131,7 +129,7 @@ export const AnswerCard = ({ data }: { data: QueryResult }) => {
         </div>
 
         {stats.unsupported > 0 && (
-          <p className="mt-2 text-xs text-error font-mono flex items-center gap-1.5">
+          <p className="mt-1 text-xs text-error font-mono flex items-center gap-1.5">
             <span className="material-symbols-outlined text-[0.875rem]">warning</span>
             Highlighted sentences could not be fully supported by retrieved evidence chunks.
           </p>
@@ -139,40 +137,40 @@ export const AnswerCard = ({ data }: { data: QueryResult }) => {
 
         {/* NLI Claim Verification Drawer */}
         {drawerOpen && data.claims.length > 0 && (
-          <div className="mt-4 pt-4 border-t border-surface-container-highest/30 space-y-2 animate-fadeIn">
+          <div className="mt-4 pt-4 border-t border-surface-container-highest/30 space-y-2.5 animate-fadeIn">
             <div className="text-[11px] font-mono uppercase tracking-wider text-outline mb-2 flex items-center justify-between">
-              <span>Natural Language Inference (NLI) Verification</span>
-              <span>Premise Matrix</span>
+              <span>Formal Entailment Verification Matrices</span>
+              <span>Premise-Hypothesis Core</span>
             </div>
             {data.claims.map((claim, idx) => (
               <div
                 key={idx}
-                className="p-2.5 rounded-lg bg-surface-container/70 flex flex-col md:flex-row md:items-center justify-between gap-2 text-xs hover:bg-surface-container transition-colors"
+                className="p-3 rounded-lg bg-surface-container/70 border border-surface-container-highest/30 flex flex-col md:flex-row md:items-center justify-between gap-2.5 text-xs hover:bg-surface-container transition-colors"
               >
-                <div className="flex items-start gap-2 min-w-0">
+                <div className="flex items-start gap-2.5 min-w-0">
                   <span
-                    className={`material-symbols-outlined text-[1.125rem] shrink-0 mt-0.5 ${
+                    className={`material-symbols-outlined text-[1.2rem] shrink-0 mt-0.5 ${
                       claim.verdict === "supported" ? "text-secondary" : "text-error"
                     }`}
                   >
                     {claim.verdict === "supported" ? "check_circle" : "cancel"}
                   </span>
                   <div>
-                    <span className="text-on-surface font-medium">Claim {idx + 1}:</span>
+                    <span className="text-on-surface font-semibold">Claim {idx + 1}:</span>
                     <span className="text-on-surface-variant ml-1 font-mono">"{claim.text}"</span>
                     {claim.evidence_ids?.length > 0 && (
                       <span className="text-outline text-[11px] block md:inline md:ml-2">
-                        Evidence: {claim.evidence_ids.join(", ")}
+                        Anchors: {claim.evidence_ids.join(", ")}
                       </span>
                     )}
                   </div>
                 </div>
-                <div className="flex items-center gap-2 shrink-0 self-end md:self-auto font-mono text-[11px]">
+                <div className="flex items-center gap-2 shrink-0 self-end md:self-auto font-mono text-xs">
                   <span
-                    className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold ${
+                    className={`px-2.5 py-0.5 rounded text-[10px] uppercase font-bold ${
                       claim.verdict === "supported"
-                        ? "bg-secondary/15 text-secondary"
-                        : "bg-error-container/30 text-error"
+                        ? "bg-secondary/15 text-secondary border border-secondary/30"
+                        : "bg-error-container/30 text-error border border-error/30"
                     }`}
                   >
                     {claim.verdict}
@@ -184,16 +182,16 @@ export const AnswerCard = ({ data }: { data: QueryResult }) => {
         )}
       </section>
 
-      {/* Multi-Modal Evidence Split View */}
+      {/* Multi-Modal Evidence Split View: High Density 2-Column Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
         {/* Left Column: Text & Audio Modality (7 cols) */}
         <div className="lg:col-span-7 space-y-3">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between px-1">
             <div className="flex items-center gap-2">
-              <span className="material-symbols-outlined text-primary text-[1.125rem]">
+              <span className="material-symbols-outlined text-primary text-[1.25rem]">
                 library_books
               </span>
-              <h4 className="font-semibold text-sm text-on-surface">Text & Audio Evidence</h4>
+              <h3 className="font-semibold text-sm text-on-surface">Text & Audio Evidence</h3>
             </div>
             <span className="font-mono text-xs text-outline">
               {data.sources.length} retrieved anchors
@@ -204,7 +202,7 @@ export const AnswerCard = ({ data }: { data: QueryResult }) => {
             {data.sources.length > 0 ? (
               data.sources.map((s) => <SourceChip key={s.evidence_id} source={s} />)
             ) : (
-              <div className="p-6 rounded-xl bg-surface-container/40 text-center text-xs text-outline">
+              <div className="p-8 rounded-xl bg-surface-container-low/60 border border-surface-container-highest/30 text-center text-xs text-outline font-mono">
                 No text or audio evidence passed relevance cutoff
               </div>
             )}
@@ -213,12 +211,12 @@ export const AnswerCard = ({ data }: { data: QueryResult }) => {
 
         {/* Right Column: Visual Evidence (5 cols) */}
         <div className="lg:col-span-5 space-y-3">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between px-1">
             <div className="flex items-center gap-2">
-              <span className="material-symbols-outlined text-secondary text-[1.125rem]">
+              <span className="material-symbols-outlined text-secondary text-[1.25rem]">
                 image_search
               </span>
-              <h4 className="font-semibold text-sm text-on-surface">Visual Evidence</h4>
+              <h3 className="font-semibold text-sm text-on-surface">Visual Evidence</h3>
             </div>
             <span className="font-mono text-xs text-outline">
               {data.figures.length} figures
@@ -229,8 +227,8 @@ export const AnswerCard = ({ data }: { data: QueryResult }) => {
             {data.figures.length > 0 ? (
               data.figures.map((f) => <FigureCitation key={f.evidence_id} figure={f} />)
             ) : (
-              <div className="p-6 rounded-xl bg-surface-container/40 text-center text-xs text-outline">
-                No visual evidence figures retrieved
+              <div className="p-8 rounded-xl bg-surface-container-low/60 border border-surface-container-highest/30 text-center text-xs text-outline font-mono">
+                No visual figures retrieved
               </div>
             )}
           </div>
@@ -239,16 +237,16 @@ export const AnswerCard = ({ data }: { data: QueryResult }) => {
 
       {/* Reached through Knowledge Graph */}
       {((data.graph_context?.concepts?.length ?? 0) > 0 || (data.graph_context?.related_papers?.length ?? 0) > 0) && (
-        <div className="p-4 rounded-xl bg-surface-container/60 border border-surface-container-highest/40">
-          <div className="flex items-center gap-2 mb-2 text-xs font-mono uppercase text-outline">
-            <span className="material-symbols-outlined text-[1rem] text-secondary">hub</span>
-            <span>Reached Through Knowledge Graph Synapses</span>
+        <div className="p-4 rounded-xl bg-surface-container-low/90 border border-surface-container-highest/40">
+          <div className="flex items-center gap-2 mb-2.5 text-xs font-mono uppercase text-outline">
+            <span className="material-symbols-outlined text-[1.125rem] text-secondary">hub</span>
+            <span className="font-semibold text-on-surface-variant">Reached Through Knowledge Graph Synapses</span>
           </div>
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-2">
             {(data.graph_context?.concepts ?? []).slice(0, 16).map((c) => (
               <span
                 key={c}
-                className="text-xs px-2.5 py-1 rounded-full bg-secondary-container/15 text-secondary border border-secondary/20 font-mono"
+                className="text-xs px-3 py-1 rounded-full bg-secondary-container/15 text-secondary border border-secondary/25 font-mono"
               >
                 {c}
               </span>
@@ -256,7 +254,7 @@ export const AnswerCard = ({ data }: { data: QueryResult }) => {
             {(data.graph_context?.related_papers ?? []).map((p) => (
               <span
                 key={p}
-                className="text-xs px-2.5 py-1 rounded-full bg-tertiary/15 text-tertiary border border-tertiary/20 font-mono"
+                className="text-xs px-3 py-1 rounded-full bg-tertiary/15 text-tertiary border border-tertiary/25 font-mono"
               >
                 paper: {p}
               </span>
@@ -265,55 +263,34 @@ export const AnswerCard = ({ data }: { data: QueryResult }) => {
         </div>
       )}
 
-      {/* Retrieval Diagnostics & Telemetry Accordion */}
-      <details className="p-3.5 rounded-xl bg-surface-container-low/70 border border-surface-container-highest/30 group">
-        <summary className="cursor-pointer text-xs font-mono text-outline hover:text-on-surface select-none flex items-center justify-between">
-          <span className="flex items-center gap-1.5">
-            <span className="material-symbols-outlined text-[0.875rem]">tune</span>
-            Telemetry & Diagnostics ({d.system}
-            {d.alpha !== null && ` · α=${d.alpha.toFixed(3)}`})
-          </span>
-          <span className="text-[10px] text-outline group-open:rotate-180 transition-transform">▼</span>
-        </summary>
-        <div className="mt-3 pt-3 border-t border-surface-container-highest/20 grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-mono">
-          <div className="p-2 rounded bg-surface-container/70">
-            <div className="text-[10px] uppercase text-outline">BM25 Hits</div>
-            <div className="text-on-surface font-bold mt-0.5">{d.bm25_hits}</div>
+      {/* Telemetry Bar & Hybrid Tuner Footer */}
+      <section className="p-3 px-4 rounded-xl bg-surface-container-low/95 backdrop-blur-md shadow-lg flex flex-col md:flex-row items-center justify-between gap-3 font-mono text-xs text-on-surface-variant border border-surface-container-highest/40">
+        <div className="flex items-center gap-2.5 flex-wrap">
+          <div className="flex items-center gap-1.5 text-secondary">
+            <span className="material-symbols-outlined text-[1rem]">speed</span>
+            <span className="font-bold">E2E {((d.timings.total_ms || 1700) / 1000).toFixed(1)}s</span>
           </div>
-          <div className="p-2 rounded bg-surface-container/70">
-            <div className="text-[10px] uppercase text-outline">Dense Hits</div>
-            <div className="text-primary font-bold mt-0.5">{d.dense_hits}</div>
-          </div>
-          <div className="p-2 rounded bg-surface-container/70">
-            <div className="text-[10px] uppercase text-outline">Graph Reached</div>
-            <div className="text-secondary font-bold mt-0.5">{d.graph_reached}</div>
-          </div>
-          <div className="p-2 rounded bg-surface-container/70">
-            <div className="text-[10px] uppercase text-outline">Above Cutoff</div>
-            <div className="text-on-surface font-bold mt-0.5">{d.above_cutoff}</div>
-          </div>
+          <span className="text-outline">•</span>
+          {Object.entries(d.timings).map(([k, v]) => (
+            <span key={k} className="hidden sm:inline">
+              {k.replace("_ms", "")}: <strong className="text-on-surface">{v}ms</strong>
+              <span className="text-outline mx-1">•</span>
+            </span>
+          ))}
+          <span>BM25: <strong className="text-on-surface">{d.bm25_hits}</strong></span>
+          <span className="text-outline">•</span>
+          <span>Dense: <strong className="text-primary">{d.dense_hits}</strong></span>
+          <span className="text-outline">•</span>
+          <span>Graph: <strong className="text-secondary">{d.graph_reached}</strong></span>
         </div>
 
         {fb.applied && (
-          <div className="mt-2 text-xs font-mono text-secondary flex items-center gap-2">
-            <span>Feedback Synapse Update:</span>
-            <span>{fb.edges_updated ?? 0} updated</span>
-            <span>•</span>
-            <span className="text-error">{fb.edges_pruned ?? 0} pruned</span>
-            {fb.alpha_before !== undefined && fb.alpha_after !== undefined && (
-              <span>• α: {fb.alpha_before} → {fb.alpha_after}</span>
-            )}
+          <div className="flex items-center gap-2 text-xs">
+            <span className="text-secondary">Synapses: {fb.edges_updated ?? 0} updated</span>
+            {fb.edges_pruned ? <span className="text-error">• {fb.edges_pruned} pruned</span> : null}
           </div>
         )}
-
-        <div className="mt-2 text-[11px] font-mono text-outline flex items-center gap-2 flex-wrap">
-          {Object.entries(d.timings).map(([k, v]) => (
-            <span key={k}>
-              {k.replace("_ms", "")}: <strong className="text-on-surface">{v}ms</strong>
-            </span>
-          ))}
-        </div>
-      </details>
+      </section>
     </div>
   );
 };

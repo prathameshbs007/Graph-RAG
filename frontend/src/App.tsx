@@ -36,37 +36,35 @@ function AppContent() {
 
   return (
     <div className="bg-surface font-sans text-on-surface min-h-screen relative overflow-x-hidden selection:bg-primary selection:text-on-primary">
-      {/* Background ambient radial gradients */}
+      {/* Background ambient radial glow */}
       <div className="fixed inset-0 pointer-events-none bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(128,131,255,0.12),transparent_70%)] z-0"></div>
 
       {/* Global Header */}
       <header className="sticky top-0 w-full z-50 bg-surface-container-lowest/85 backdrop-blur-2xl border-b border-surface-container-highest/30">
         <div className="h-16 w-full px-4 md:px-8 flex items-center justify-between gap-4 max-w-7xl mx-auto">
           {/* Brand Logo & Version */}
-          <div className="flex items-center gap-4 shrink-0">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-surface-container-high flex items-center justify-center text-primary shadow-[0_0_12px_rgba(192,193,255,0.25)]">
-                <span className="material-symbols-outlined text-[1.25rem]">hub</span>
-              </div>
-              <span className="font-bold text-lg text-on-surface tracking-tight font-sans">
-                ResearchOS
-              </span>
-              <span className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-surface-container-highest text-tertiary tracking-wider uppercase">
-                v2.4-agentic
-              </span>
+          <div className="flex items-center gap-3 shrink-0">
+            <div className="w-8 h-8 rounded-lg bg-surface-container-high flex items-center justify-center text-primary shadow-[0_0_12px_rgba(192,193,255,0.25)] border border-surface-container-highest/50">
+              <span className="material-symbols-outlined text-[1.25rem]">hub</span>
             </div>
+            <span className="font-bold text-lg text-on-surface tracking-tight font-sans">
+              ResearchOS
+            </span>
+            <span className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-surface-container-highest text-tertiary tracking-wider uppercase font-semibold">
+              v2.4-agentic
+            </span>
 
-            {/* Model / DB Status Indicators */}
-            <div className="hidden xl:flex items-center gap-1.5">
-              <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-surface-container-low font-mono text-[11px] text-on-surface-variant">
+            {/* Model & DB Status Badges */}
+            <div className="hidden xl:flex items-center gap-1.5 ml-3">
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-surface-container-low font-mono text-[11px] text-on-surface-variant border border-surface-container-highest/40">
                 <span className="w-1.5 h-1.5 rounded-full bg-secondary shadow-[0_0_8px_#4fdbc8] animate-pulse"></span>
                 <span>Groq Llama-3.3</span>
               </div>
-              <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-surface-container-low font-mono text-[11px] text-on-surface-variant">
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-surface-container-low font-mono text-[11px] text-on-surface-variant border border-surface-container-highest/40">
                 <span className="w-1.5 h-1.5 rounded-full bg-secondary-container shadow-[0_0_8px_#04b4a2]"></span>
                 <span>Weaviate Hybrid</span>
               </div>
-              <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-surface-container-low font-mono text-[11px] text-on-surface-variant">
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-surface-container-low font-mono text-[11px] text-on-surface-variant border border-surface-container-highest/40">
                 <span className="w-1.5 h-1.5 rounded-full bg-primary-container shadow-[0_0_8px_#8083ff]"></span>
                 <span>Neo4j Bolt</span>
               </div>
@@ -82,7 +80,7 @@ function AppContent() {
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   type="button"
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
                     isActive
                       ? "bg-surface-container-high text-primary shadow-[0_0_10px_rgba(128,131,255,0.2)] border border-primary/30"
                       : "text-on-surface-variant hover:text-on-surface hover:bg-surface-container/60"
@@ -97,19 +95,6 @@ function AppContent() {
 
           {/* Right Header Utility Controls */}
           <div className="flex items-center gap-2 shrink-0">
-            {systems.length > 0 && activeTab === "search" && (
-              <select
-                value={system}
-                onChange={(e) => setSystem(e.target.value)}
-                className="bg-surface-container-low border border-surface-container-highest/60 rounded-lg px-2.5 py-1 text-on-surface font-mono text-xs focus:outline-none hidden md:block"
-              >
-                {systems.map((s) => (
-                  <option key={s.name} value={s.name} className="bg-surface-container-high text-on-surface">
-                    {s.description || s.name}
-                  </option>
-                ))}
-              </select>
-            )}
             <ClearDBButton />
           </div>
         </div>
@@ -118,9 +103,15 @@ function AppContent() {
       {/* Main Content Area */}
       <main className="relative z-10 w-full max-w-7xl mx-auto px-4 md:px-8 py-6">
         {activeTab === "search" && (
-          <div className="flex flex-col gap-6 max-w-5xl mx-auto">
-            {/* Search Omnibar */}
-            <QueryBar onSearch={(txt) => executeQuery(txt, system)} loading={loading} />
+          <div className="flex flex-col gap-6 w-full">
+            {/* Search Omnibar Hero */}
+            <QueryBar
+              onSearch={(txt) => executeQuery(txt, system)}
+              loading={loading}
+              systems={systems}
+              selectedSystem={system}
+              onSelectSystem={setSystem}
+            />
 
             {/* Error Banner */}
             {error && (
@@ -133,46 +124,24 @@ function AppContent() {
               </div>
             )}
 
-            {/* Results Component */}
+            {/* Answer & Evidence Synthesis */}
             {data && !loading && <AnswerCard data={data} />}
 
-            {/* Empty State Showcase */}
+            {/* Clean Hero State when no query run yet */}
             {!data && !loading && !error && (
-              <div className="w-full mt-6 space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {[
-                    {
-                      icon: "auto_stories",
-                      title: "Cross-Modal Anchoring",
-                      desc: "Aligns PDF chunks, visual flowchart figures, and audio timestamps into a unified representation.",
-                      accent: "text-primary border-primary/20",
-                    },
-                    {
-                      icon: "grain",
-                      title: "Self-Pruning Memory",
-                      desc: "Hebbian reinforcement dynamic synapses decay and auto-prune noisy or unhelpful relations.",
-                      accent: "text-secondary border-secondary/20",
-                    },
-                    {
-                      icon: "verified_user",
-                      title: "NLI Claim Entailment",
-                      desc: "Verifies extracted answer claims against cited premise vectors with formal confidence scores.",
-                      accent: "text-tertiary border-tertiary/20",
-                    },
-                  ].map((item, idx) => (
-                    <div
-                      key={idx}
-                      className={`p-5 rounded-xl bg-surface-container-low/70 border ${item.accent} backdrop-blur shadow-md flex flex-col justify-between`}
-                    >
-                      <div>
-                        <span className="material-symbols-outlined text-[2rem] mb-2 block">
-                          {item.icon}
-                        </span>
-                        <h4 className="font-semibold text-sm text-on-surface mb-1">{item.title}</h4>
-                        <p className="text-xs text-on-surface-variant leading-relaxed">{item.desc}</p>
-                      </div>
-                    </div>
-                  ))}
+              <div className="w-full mt-4 p-8 rounded-2xl bg-surface-container-low/70 border border-surface-container-highest/30 backdrop-blur-xl relative overflow-hidden shadow-lg">
+                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent"></div>
+                <div className="max-w-2xl mx-auto text-center space-y-3">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary font-mono text-xs font-semibold">
+                    <span className="material-symbols-outlined text-[0.875rem]">hub</span>
+                    Cross-Modal Knowledge Engine
+                  </div>
+                  <h2 className="text-2xl md:text-3xl font-bold text-on-surface tracking-tight">
+                    Evidence-Based Research Intelligence
+                  </h2>
+                  <p className="text-xs md:text-sm text-on-surface-variant leading-relaxed">
+                    Query across arXiv preprints, extracted architectural flowcharts, and symposium audio. Every claim is strictly grounded in retrieved evidence chunks and audited via Natural Language Inference.
+                  </p>
                 </div>
               </div>
             )}
@@ -186,7 +155,7 @@ function AppContent() {
         {activeTab === "upload" && <UploadPanel />}
       </main>
 
-      {/* Global Background Upload Notifications */}
+      {/* Background Upload Notifications */}
       <UploadNotification />
     </div>
   );
