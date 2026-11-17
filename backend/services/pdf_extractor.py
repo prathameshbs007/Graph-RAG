@@ -311,10 +311,17 @@ def _pick_figure_region(cap, other_caps: list, regions: list, used: list, page_r
 def _ocr_text(pix) -> str:
     try:
         import pytesseract
-        from PIL import Image
+        from PIL import Image, ImageOps, ImageStat
 
         img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
-        text = pytesseract.image_to_string(img).strip()
+        gray = ImageOps.grayscale(img)
+        if ImageStat.Stat(gray).mean[0] < 128:
+            ocr_img = ImageOps.invert(gray)
+            if ocr_img.width < 1000:
+                ocr_img = ocr_img.resize((ocr_img.width * 2, ocr_img.height * 2), Image.LANCZOS)
+        else:
+            ocr_img = img
+        text = pytesseract.image_to_string(ocr_img).strip()
         return re.sub(r"\s+", " ", text)[:400] if len(text) > 5 else ""
     except Exception:  # noqa: BLE001 - OCR is a bonus, never a requirement
         return ""
@@ -496,6 +503,10 @@ def extract_pdf_data(file_path: str, paper_id: str, output_dir: str) -> Extracte
             pix = page.get_pixmap(clip=crop, dpi=150)
             pix.save(path)
             figure_text = " ".join(inner)[:400] or _ocr_text(pix)
+            fig_section = section
+            for prev in items[:idx]:
+                if prev["kind"] == "heading" and not REFERENCES_HEADING.match(prev["text"]):
+                    fig_section = prev["text"]
             out.figures.append(
                 {
                     "figure_id": fig_id,
@@ -504,7 +515,7 @@ def extract_pdf_data(file_path: str, paper_id: str, output_dir: str) -> Extracte
                     "bbox": [round(v, 1) for v in (crop.x0, crop.y0, crop.x1, crop.y1)],
                     "file_path": path,
                     "ocr_text": figure_text,
-                    "section": section,
+                    "section": fig_section,
                 }
             )
             consumed.add(idx)  # the caption now lives with its figure

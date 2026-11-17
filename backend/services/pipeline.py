@@ -22,6 +22,7 @@ from services.embedder import EmbeddingError, embed_query
 from services.feedback import FeedbackEngine
 from services.fusion import fuse_alpha, fuse_rrf
 from services.generator import describe_location, generator
+from services.hyde import hyde
 from services.neo4j_client import graph_db
 from services.reranker import reranker
 from services.weaviate_client import db
@@ -134,11 +135,24 @@ class QueryPipeline:
     def _first_stage(self, query: str, system: SystemConfig, alpha: Optional[float], notes: list):
         k = self.cfg.RETRIEVAL_TOP_K
         bm25_hits, dense_hits = [], []
+
+        # --- BM25: always uses the raw user query (keywords matter) ---
         if system.retriever in ("hybrid", "bm25"):
             bm25_hits = self.store.bm25(query, k)
+
+        # --- Dense: use HyDE vector when enabled, otherwise plain query embedding ---
         if system.retriever in ("hybrid", "dense"):
             try:
-                dense_hits = self.store.dense(self.embed(query), k)
+                # HyDE: hallucinate an expert answer, embed it with the doc prefix
+                dense_vector = hyde.generate(query)
+                if dense_vector is None:
+                    # HyDE disabled or failed → fall back to query embedding
+                    dense_vector = self.embed(query)
+                    if dense_vector is None:
+                        raise EmbeddingError("embed_query returned None")
+                else:
+                    notes.append("dense search using HyDE vector")
+                dense_hits = self.store.dense(dense_vector, k)
             except EmbeddingError as exc:
                 notes.append(f"dense retrieval unavailable ({exc}); using BM25 only")
                 if system.retriever == "dense":
@@ -257,6 +271,7 @@ class QueryPipeline:
             "system": system.name,
             "alpha": None if alpha is None else round(alpha, 4),
             "fusion": cfg.FUSION if system.retriever == "hybrid" else system.retriever,
+            "hyde_enabled": cfg.HYDE_ENABLED,
             "bm25_hits": n_bm25,
             "dense_hits": n_dense,
             "seeds": len(seed_ids),

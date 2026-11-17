@@ -131,7 +131,7 @@ def _extract_batch(batch: list[dict]) -> ConceptGraph:
         raw = llm.chat(
             [{"role": "system", "content": SYSTEM_PROMPT}, {"role": "user", "content": build_prompt(batch)}],
             temperature=0.0,
-            max_tokens=1500,
+            max_tokens=600,
             json_mode=True,
         )
         return parse_response(raw, batch)

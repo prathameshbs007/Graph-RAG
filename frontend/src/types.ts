@@ -55,6 +55,7 @@ export interface Diagnostics {
   system: string;
   alpha: number | null;
   fusion: string;
+  hyde_enabled?: boolean;
   bm25_hits: number;
   dense_hits: number;
   seeds: number;

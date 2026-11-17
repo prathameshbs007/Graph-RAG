@@ -150,3 +150,45 @@ def test_scanned_pdf_goes_through_ocr_not_through_heading_detection(tmp_path):
     ex = extract_pdf_data(str(path), "S", str(tmp_path / "f"))
     text = " ".join(c["chunk_text"] for c in ex.chunks).lower()
     assert "dense embeddings" in text and "reranker" in text
+
+
+def test_figure_uses_same_page_preceding_heading(tmp_path):
+    """A figure placed after a heading on the same page should inherit that heading,
+    not the previous page's carried-over section."""
+    import pymupdf
+
+    p = tmp_path / "sec_fig.pdf"
+    doc = pymupdf.open()
+    pg1 = doc.new_page(width=595, height=842)
+    pg1.insert_text((72, 80), "1 Related Works", fontsize=14, fontname="helv")
+    pg1.insert_textbox(pymupdf.Rect(72, 100, 520, 320), BODY, fontsize=10)
+
+    pg2 = doc.new_page(width=595, height=842)
+    pg2.insert_text((72, 80), "3.1 Unity Implementation Framework", fontsize=14, fontname="helv")
+    pg2.draw_rect(pymupdf.Rect(72, 110, 420, 260), color=(0, 0, 0), fill=(0.9, 0.9, 0.9))
+    pg2.insert_text((72, 280), "Figure 1: Workflow of Indoor Navigation.", fontsize=10)
+    pg2.insert_textbox(pymupdf.Rect(72, 300, 520, 500), BODY, fontsize=10)
+    doc.save(str(p))
+
+    ex = extract_pdf_data(str(p), "SF", str(tmp_path / "f"))
+    assert len(ex.figures) == 1
+    assert ex.figures[0]["section"] == "3.1 Unity Implementation Framework"
+
+
+def test_dark_background_figure_ocr_reads_white_text():
+    """Dark-background flowcharts (white text on dark grey/black) are inverted before OCR."""
+    import shutil
+
+    if shutil.which("tesseract") is None:
+        pytest.skip("tesseract not installed on this machine (it is in the Docker image)")
+    from types import SimpleNamespace
+    from PIL import Image, ImageDraw, ImageFont
+    from services.pdf_extractor import _ocr_text
+
+    img = Image.new("RGB", (400, 140), (24, 24, 24))
+    d = ImageDraw.Draw(img)
+    f = ImageFont.load_default(size=22)
+    d.text((24, 48), "Load Unity Environment", fill=(240, 240, 240), font=f)
+    pix = SimpleNamespace(width=img.width, height=img.height, samples=img.tobytes())
+    text = _ocr_text(pix)
+    assert "unity" in text.lower()

@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
 
   frontend:
@@ -12,32 +10,13 @@ services:
     ports: ["8054:8000"]
     env_file: .env
     volumes:
+      - ./backend:/app
       - figures_data:/app/figures
     depends_on:
       weaviate: { condition: service_healthy }
       neo4j:    { condition: service_healthy }
       ollama:   { condition: service_started }
 
-  # Module 5 (Ragas evaluation). Opt-in so a normal "docker compose up" never builds it:
-  #   docker compose --profile eval run --rm eval --run run1 testset --size 200
-  # See backend/eval/README.md for the full sequence.
-  eval:
-    profiles: ["eval"]
-    build:
-      context: ./backend
-      args:
-        EXTRA_REQUIREMENTS: requirements-eval.txt
-    env_file: .env
-    environment:
-      EVAL_DIR: /app/eval_runs
-    volumes:
-      - eval_data:/app/eval_runs
-      - figures_data:/app/figures
-    depends_on:
-      weaviate: { condition: service_healthy }
-      neo4j:    { condition: service_healthy }
-      ollama:   { condition: service_started }
-    entrypoint: ["python", "-m", "eval"]
 
   weaviate:
     image: semitechnologies/weaviate:1.24.1
@@ -78,4 +57,3 @@ volumes:
   neo4j_data:
   ollama_data:
   figures_data:
-  eval_data:

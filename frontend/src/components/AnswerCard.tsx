@@ -90,6 +90,13 @@ export const AnswerCard = ({ data }: { data: QueryResult }) => {
                 <span>α = {d.alpha.toFixed(3)}</span>
               </div>
             )}
+
+            {d.hyde_enabled && (
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-surface-container font-mono text-xs text-primary border border-primary/30">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+                <span>HyDE Active</span>
+              </div>
+            )}
           </div>
 
           {data.claims.length > 0 && (

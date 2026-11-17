@@ -82,5 +82,12 @@ class Settings(BaseSettings):
     VERIFY_CLAIMS: bool = True
     VERIFY_MODE: str = "flag"  # "flag" keeps unsupported claims marked, "remove" drops them
 
+    # ------------------------------------------------ HyDE (pre-retrieval augmentation)
+    # Set HYDE_ENABLED=false to bypass HyDE and fall back to plain query embedding.
+    # Ollama (llama3.1:8b) is always used for hallucination regardless of LLM_PROVIDER.
+    HYDE_ENABLED: bool = True
+    HYDE_TEMPERATURE: float = 0.7   # creative hallucination temperature (keep ≥ 0.5)
+    HYDE_MAX_TOKENS: int = 256      # keep the hallucinated answer concise
+
 
 settings = Settings()
