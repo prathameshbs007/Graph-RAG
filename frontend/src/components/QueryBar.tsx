@@ -7,6 +7,8 @@ interface QueryBarProps {
   systems?: SystemInfo[];
   selectedSystem?: string;
   onSelectSystem?: (system: string) => void;
+  useHyde?: boolean;
+  onToggleHyde?: () => void;
 }
 
 const SEED_QUERIES = [
@@ -22,6 +24,8 @@ export const QueryBar: React.FC<QueryBarProps> = ({
   systems = [],
   selectedSystem = "full",
   onSelectSystem,
+  useHyde = true,
+  onToggleHyde,
 }) => {
   const [text, setText] = useState("");
 
@@ -65,8 +69,30 @@ export const QueryBar: React.FC<QueryBarProps> = ({
             </span>
           </div>
 
-          {/* Controls: Pipeline Mode & Execute */}
+          {/* Controls: HyDE Toggle, Pipeline Mode & Execute */}
           <div className="flex items-center gap-2 shrink-0 w-full md:w-auto justify-end pr-1 pt-1 md:pt-0">
+            {/* Live HyDE ON/OFF Toggle */}
+            {onToggleHyde && (
+              <button
+                type="button"
+                onClick={onToggleHyde}
+                disabled={loading}
+                title="Toggle Hypothetical Document Embeddings (HyDE) for dense search. BM25 always uses the raw query."
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full font-mono text-xs transition-all cursor-pointer border shrink-0 ${
+                  useHyde
+                    ? "bg-primary/15 text-primary border-primary/40 shadow-[0_0_12px_rgba(192,193,255,0.18)] hover:bg-primary/25"
+                    : "bg-surface-container-high text-on-surface-variant border-surface-container-highest/60 hover:text-on-surface"
+                }`}
+              >
+                <span
+                  className={`w-1.5 h-1.5 rounded-full ${
+                    useHyde ? "bg-primary animate-pulse" : "bg-outline"
+                  }`}
+                />
+                <span>HyDE: {useHyde ? "ON" : "OFF"}</span>
+              </button>
+            )}
+
             {/* System / Pipeline Selector */}
             {systems.length > 0 && onSelectSystem && (
               <div className="relative">

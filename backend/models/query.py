@@ -12,6 +12,7 @@ class QueryRequest(BaseModel):
     learn: Optional[bool] = None
     seed: Optional[int] = None  # makes the 5% edge exploration reproducible
     verify: Optional[bool] = None  # override claim verification
+    hyde: Optional[bool] = None  # override HyDE pre-retrieval augmentation (None = config default)
 
 
 class SourceChunk(BaseModel):

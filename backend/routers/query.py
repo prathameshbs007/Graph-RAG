@@ -11,7 +11,14 @@ router = APIRouter(prefix="/query", tags=["query"])
 @router.post("", response_model=QueryResponse)
 def query_endpoint(req: QueryRequest):
     try:
-        return pipeline.answer(req.text, system=req.system, learn=req.learn, seed=req.seed, verify=req.verify)
+        return pipeline.answer(
+            req.text,
+            system=req.system,
+            learn=req.learn,
+            seed=req.seed,
+            verify=req.verify,
+            use_hyde=req.hyde,
+        )
     except ValueError as exc:  # unknown system name
         raise HTTPException(status_code=400, detail=str(exc))
 

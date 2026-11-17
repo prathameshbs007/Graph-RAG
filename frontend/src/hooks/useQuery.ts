@@ -9,11 +9,11 @@ export const useQuery = () => {
   const [error, setError] = useState<string | null>(null);
 
   // `system` selects the full ResearchOS pipeline or one of the baselines / ablations.
-  const executeQuery = async (text: string, system: string = "full") => {
+  const executeQuery = async (text: string, system: string = "full", hyde: boolean = true) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await axios.post<QueryResult>(`${API}/query`, { text, system });
+      const res = await axios.post<QueryResult>(`${API}/query`, { text, system, hyde });
       setData(res.data);
     } catch (err: unknown) {
       const detail = axios.isAxiosError(err) ? err.response?.data?.detail : undefined;

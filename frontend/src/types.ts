@@ -50,12 +50,28 @@ export interface FeedbackSummary {
   alpha_after?: number;
 }
 
+export interface HydeTrace {
+  enabled: boolean;
+  used: boolean;
+  provider?: string | null;
+  model?: string | null;
+  temperature?: number;
+  bm25_query: string;
+  hypothetical_doc?: string | null;
+  embed_model?: string;
+  vector_dim?: number;
+  vector_preview?: number[];
+  latency_ms?: number;
+  fallback_reason?: string | null;
+}
+
 export interface Diagnostics {
   query_id: string;
   system: string;
   alpha: number | null;
   fusion: string;
   hyde_enabled?: boolean;
+  hyde?: HydeTrace;
   bm25_hits: number;
   dense_hits: number;
   seeds: number;

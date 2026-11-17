@@ -26,6 +26,7 @@ function AppContent() {
   const [activeTab, setActiveTab] = useState<Tab>("search");
   const [systems, setSystems] = useState<SystemInfo[]>([]);
   const [system, setSystem] = useState("full");
+  const [useHyde, setUseHyde] = useState(true);
 
   useEffect(() => {
     axios
@@ -106,11 +107,13 @@ function AppContent() {
           <div className="flex flex-col gap-6 w-full">
             {/* Search Omnibar Hero */}
             <QueryBar
-              onSearch={(txt) => executeQuery(txt, system)}
+              onSearch={(txt) => executeQuery(txt, system, useHyde)}
               loading={loading}
               systems={systems}
               selectedSystem={system}
               onSelectSystem={setSystem}
+              useHyde={useHyde}
+              onToggleHyde={() => setUseHyde((v) => !v)}
             />
 
             {/* Error Banner */}

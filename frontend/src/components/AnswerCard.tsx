@@ -44,8 +44,10 @@ export const AnswerCard = ({ data }: { data: QueryResult }) => {
   const { claim_stats: stats, diagnostics: d } = data;
   const segments = markUnsupported(data.answer, data.claims);
   const fb = d.feedback;
+  const hyde = d.hyde;
   const checked = stats.supported + stats.unsupported;
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [hydeOpen, setHydeOpen] = useState(false);
 
   return (
     <div className="w-full space-y-6">
@@ -91,11 +93,42 @@ export const AnswerCard = ({ data }: { data: QueryResult }) => {
               </div>
             )}
 
-            {d.hyde_enabled && (
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-surface-container font-mono text-xs text-primary border border-primary/30">
-                <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
-                <span>HyDE Active</span>
-              </div>
+            {hyde ? (
+              <button
+                type="button"
+                onClick={() => setHydeOpen((v) => !v)}
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md font-mono text-xs transition-colors cursor-pointer border ${
+                  hyde.used
+                    ? "bg-primary/15 text-primary border-primary/40 hover:bg-primary/25"
+                    : "bg-surface-container text-on-surface-variant border-surface-container-highest/50 hover:text-on-surface"
+                }`}
+                title="Click to inspect live HyDE pre-retrieval passage, split BM25/Dense query, and embedding vector"
+              >
+                <span
+                  className={`w-1.5 h-1.5 rounded-full ${
+                    hyde.used ? "bg-primary animate-pulse" : "bg-outline"
+                  }`}
+                />
+                <span>
+                  {hyde.used
+                    ? `HyDE Active${hyde.latency_ms ? ` · ${hyde.latency_ms}ms` : ""}`
+                    : "HyDE Off"}
+                </span>
+                <span
+                  className={`material-symbols-outlined text-[0.85rem] transition-transform duration-200 ${
+                    hydeOpen ? "rotate-180" : ""
+                  }`}
+                >
+                  expand_more
+                </span>
+              </button>
+            ) : (
+              d.hyde_enabled && (
+                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-surface-container font-mono text-xs text-primary border border-primary/30">
+                  <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+                  <span>HyDE Active</span>
+                </div>
+              )
             )}
           </div>
 
@@ -140,6 +173,88 @@ export const AnswerCard = ({ data }: { data: QueryResult }) => {
             <span className="material-symbols-outlined text-[0.875rem]">warning</span>
             Highlighted sentences could not be fully supported by retrieved evidence chunks.
           </p>
+        )}
+
+        {/* Live HyDE Pre-Retrieval Inspector Drawer */}
+        {hydeOpen && hyde && (
+          <div className="mt-4 pt-4 border-t border-surface-container-highest/30 space-y-3 animate-fadeIn">
+            <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono uppercase tracking-wider text-outline">
+              <div className="flex items-center gap-1.5 text-primary">
+                <span className="material-symbols-outlined text-[1rem]">auto_fix_high</span>
+                <span>HyDE Pre-Retrieval Inspector (Live Split-Query Trace)</span>
+              </div>
+              <div className="flex items-center gap-2 flex-wrap">
+                {hyde.used && hyde.provider && hyde.model && (
+                  <span className="px-2 py-0.5 rounded bg-surface-container text-on-surface-variant border border-surface-container-highest/50 normal-case">
+                    {hyde.provider} · {hyde.model}
+                  </span>
+                )}
+                {hyde.used && hyde.temperature !== undefined && (
+                  <span className="px-2 py-0.5 rounded bg-surface-container text-on-surface-variant border border-surface-container-highest/50 normal-case">
+                    temp={hyde.temperature}
+                  </span>
+                )}
+                {hyde.latency_ms ? (
+                  <span className="px-2 py-0.5 rounded bg-primary/15 text-primary border border-primary/30 normal-case">
+                    {hyde.latency_ms}ms
+                  </span>
+                ) : null}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+              {/* Left: Raw Query -> BM25 */}
+              <div className="p-3.5 rounded-xl bg-surface-container/70 border border-surface-container-highest/40 space-y-1.5">
+                <div className="flex items-center justify-between font-mono text-[11px] text-secondary">
+                  <span className="font-semibold uppercase tracking-wide">BM25 Lexical Search</span>
+                  <span className="text-outline">Raw User Query</span>
+                </div>
+                <p className="font-mono text-on-surface leading-relaxed break-words">
+                  "{hyde.bm25_query}"
+                </p>
+              </div>
+
+              {/* Right: Hypothetical Document -> Dense Vector */}
+              <div className="p-3.5 rounded-xl bg-surface-container/70 border border-primary/30 space-y-1.5">
+                <div className="flex items-center justify-between font-mono text-[11px] text-primary">
+                  <span className="font-semibold uppercase tracking-wide">
+                    {hyde.used ? "Dense Search (HyDE Passage)" : "Dense Search (Direct Query)"}
+                  </span>
+                  <span className="text-outline">
+                    {hyde.used ? "search_document:" : "search_query:"}
+                  </span>
+                </div>
+                {hyde.used && hyde.hypothetical_doc ? (
+                  <>
+                    <p className="text-on-surface-variant leading-relaxed italic font-sans">
+                      "{hyde.hypothetical_doc}"
+                    </p>
+                    <p className="text-[10px] font-mono text-outline pt-1">
+                      Generated strictly to embed the dense Weaviate search vector — never used as evidence in the grounded answer above.
+                    </p>
+                  </>
+                ) : (
+                  <p className="font-mono text-on-surface-variant leading-relaxed">
+                    HyDE bypassed ({hyde.fallback_reason || "disabled"}). Raw query was embedded directly for Weaviate dense search.
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Live Embedding Vector Preview */}
+            {hyde.vector_dim ? (
+              <div className="px-3.5 py-2 rounded-lg bg-surface-container-lowest/80 border border-surface-container-highest/30 flex flex-wrap items-center justify-between gap-2 font-mono text-[11px] text-on-surface-variant">
+                <span>
+                  Embedding: <strong className="text-on-surface">{hyde.embed_model || "nomic-embed-text"}</strong> ({hyde.vector_dim}-dim)
+                </span>
+                {hyde.vector_preview && hyde.vector_preview.length > 0 && (
+                  <span className="text-primary">
+                    vec[:5] = [{hyde.vector_preview.map((v) => v.toFixed(4)).join(", ")}, ...]
+                  </span>
+                )}
+              </div>
+            ) : null}
+          </div>
         )}
 
         {/* NLI Claim Verification Drawer */}

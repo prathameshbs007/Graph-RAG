@@ -22,7 +22,7 @@ from services.embedder import EmbeddingError, embed_query
 from services.feedback import FeedbackEngine
 from services.fusion import fuse_alpha, fuse_rrf
 from services.generator import describe_location, generator
-from services.hyde import hyde
+from services.hyde import HyDEResult, hyde
 from services.neo4j_client import graph_db
 from services.reranker import reranker
 from services.weaviate_client import db
@@ -132,9 +132,23 @@ class QueryPipeline:
         self.store, self.graph, self.rerank, self.embed, self.cfg = store, graph, rerank, embed, cfg
 
     # ---- stage 1: first-stage retrieval + fusion
-    def _first_stage(self, query: str, system: SystemConfig, alpha: Optional[float], notes: list):
+    def _first_stage(
+        self,
+        query: str,
+        system: SystemConfig,
+        alpha: Optional[float],
+        notes: list,
+        use_hyde: Optional[bool] = None,
+    ):
         k = self.cfg.RETRIEVAL_TOP_K
         bm25_hits, dense_hits = [], []
+        hyde_flag = self.cfg.HYDE_ENABLED if use_hyde is None else use_hyde
+        hyde_res = HyDEResult(
+            enabled=hyde_flag,
+            temperature=self.cfg.HYDE_TEMPERATURE,
+            embed_model=self.cfg.EMBED_MODEL,
+            fallback_reason="retriever is bm25-only" if system.retriever == "bm25" else None,
+        )
 
         # --- BM25: always uses the raw user query (keywords matter) ---
         if system.retriever in ("hybrid", "bm25"):
@@ -144,12 +158,15 @@ class QueryPipeline:
         if system.retriever in ("hybrid", "dense"):
             try:
                 # HyDE: hallucinate an expert answer, embed it with the doc prefix
-                dense_vector = hyde.generate(query)
+                hyde_res = hyde.generate_with_trace(query, enabled=hyde_flag)
+                dense_vector = hyde_res.vector
                 if dense_vector is None:
                     # HyDE disabled or failed → fall back to query embedding
                     dense_vector = self.embed(query)
                     if dense_vector is None:
                         raise EmbeddingError("embed_query returned None")
+                    hyde_res.vector_dim = len(dense_vector)
+                    hyde_res.vector_preview = [round(float(v), 4) for v in dense_vector[:5]]
                 else:
                     notes.append("dense search using HyDE vector")
                 dense_hits = self.store.dense(dense_vector, k)
@@ -173,7 +190,7 @@ class QueryPipeline:
             tags.setdefault(cid, set()).add("bm25")
         for cid, _ in dense:
             tags.setdefault(cid, set()).add("dense")
-        return ranked, hits, tags, len(bm25), len(dense)
+        return ranked, hits, tags, len(bm25), len(dense), hyde_res
 
     # ---- the whole retrieval side
     def retrieve(
@@ -183,6 +200,7 @@ class QueryPipeline:
         learn: Optional[bool] = None,
         seed: Optional[int] = None,
         query_id: Optional[str] = None,
+        use_hyde: Optional[bool] = None,
     ) -> PipelineResult:
         cfg = self.cfg
         query_id = query_id or uuid.uuid4().hex[:12]
@@ -195,7 +213,11 @@ class QueryPipeline:
         if use_alpha:
             alpha = self.graph.get_alpha() if system.adaptive_alpha else system.fixed_alpha
 
-        ranked, hits, tags, n_bm25, n_dense = self._first_stage(query, system, alpha, notes)
+        ranked, hits, tags, n_bm25, n_dense, hyde_res = self._first_stage(
+            query, system, alpha, notes, use_hyde=use_hyde
+        )
+        if hyde_res.used:
+            timings["hyde_ms"] = hyde_res.latency_ms
         timings["first_stage_ms"] = round((time.time() - t0) * 1000)
 
         pool: dict[str, Candidate] = {}
@@ -271,7 +293,8 @@ class QueryPipeline:
             "system": system.name,
             "alpha": None if alpha is None else round(alpha, 4),
             "fusion": cfg.FUSION if system.retriever == "hybrid" else system.retriever,
-            "hyde_enabled": cfg.HYDE_ENABLED,
+            "hyde_enabled": hyde_res.used,
+            "hyde": hyde_res.trace_dict(query),
             "bm25_hits": n_bm25,
             "dense_hits": n_dense,
             "seeds": len(seed_ids),
@@ -293,10 +316,11 @@ class QueryPipeline:
         learn: Optional[bool] = None,
         seed: Optional[int] = None,
         verify: Optional[bool] = None,
+        use_hyde: Optional[bool] = None,
     ) -> dict:
         t0 = time.time()
         sys_cfg = get_system(system)
-        res = self.retrieve(query, sys_cfg, learn=learn, seed=seed)
+        res = self.retrieve(query, sys_cfg, learn=learn, seed=seed, use_hyde=use_hyde)
 
         sources_all = [_source_dict(c, f"E{i}") for i, c in enumerate(res.context, start=1)]
         t_gen = time.time()
