@@ -10,6 +10,8 @@
 ![Cohere](https://img.shields.io/badge/Cohere-Rerank_v3.5-39594D?style=for-the-badge)
 ![Docker](https://img.shields.io/badge/Docker-Compose_Stack-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 
+**Quick Links:** [Overview](#overview) | [UI Gallery](#platform-ui-gallery) | [System Architecture](#system-architecture) | [Mathematical Formulation](#mathematical-formulation) | [Empirical Validation & Plots](#empirical-validation--benchmark-results) | [Quick Start](#quick-start) | [API Reference](#rest-api-reference)
+
 ---
 
 ## Overview
@@ -18,18 +20,37 @@
 
 Unlike static RAG pipelines that suffer from query-document semantic mismatch and accumulate noisy graph edges over time, ResearchOS introduces two core architectural innovations:
 
-1. **Split-Query HyDE Pre-Retrieval Augmentation**: Bridges the geometric gap between short interrogative user queries and declarative academic prose. ResearchOS preserves the **raw user query for BM25 lexical search** (protecting exact identifiers like `IfcSpace` or error codes) while generating a **Hypothetical Document Embedding (HyDE)** exclusively for the dense vector leg.
+1. **Split-Query HyDE Pre-Retrieval Augmentation**: Bridges the geometric gap between short interrogative user queries and declarative academic prose. ResearchOS preserves the **raw user query for BM25 lexical search** (protecting exact identifiers like `IfcSpace` or domain-specific terminology) while generating a **Hypothetical Document Embedding (HyDE)** exclusively for the dense vector leg.
 2. **Self-Pruning Agentic Graph Memory**: Uses cross-encoder relevance scores from **Cohere Rerank v3.5** as an online reinforcement signal. Graph edges that consistently route traversal toward high-scoring evidence are strengthened, while noisy edges decay and are automatically soft-pruned—paired with an adaptive fusion controller that dynamically tunes $\alpha$ between lexical and semantic search.
+
+---
+
+## Platform UI Gallery
+
+### 1. Search & QA Workspace (Live Split-Query HyDE Inspector, Visual Figure Citations & NLI Audit)
+Toggle `HyDE: ON / OFF` per query directly from the Omnibar, inspect the side-by-side raw BM25 query vs. hallucinated dense passage and $768$-dim vector preview (`vec[:5]`), view extracted PDF figure crops with bounding-box provenance, and audit sentence-level claim verification.
+
+![Search and QA Workspace](docs/snapshots/search_qa.png)
+
+### 2. Interactive Knowledge Graph Explorer
+Force-directed Neo4j graph visualization displaying `Paper`, `Chunk`, `Figure`, and `Concept` nodes. Synapses are dynamically styled by learned edge weights ($w_e$): reinforced pathways appear thick and vibrant, weakening pathways shift toward red, and soft-pruned edges ($w_e < 0.28$ after $\ge 5$ visits) render as dashed lines.
+
+![Knowledge Graph Explorer](docs/snapshots/knowledge_graph.png)
+
+### 3. Self-Pruning Agentic Memory & Synapse Telemetry
+Real-time observability dashboard tracking the adaptive hybrid fusion weight ($\alpha$), total active vs. soft-pruned synapse counts, edge weight distributions across `MENTIONS` and `RELATED_TO` relations, and the chronological feedback audit log.
+
+![Agentic Memory Dashboard](docs/snapshots/memory.png)
 
 ---
 
 ## Core Capabilities
 
-* **Unified Multi-Modal Ingestion**: Parses PDFs via `PyMuPDF` into $\sim 300$-token overlapping chunks, preserves table headers across row splits, crops figures with automatic same-page section attribution and dark-background inversion OCR ($2\times$ upscaled Tesseract or optional VLM), and transcribes talk audio into $30\text{ s}$ timestamped windows via `faster-whisper`.
-* **Live, Teacher-Proof HyDE Observability**: Toggle `HyDE: ON / OFF` per query directly from the UI Omnibar. Inspect the live split-query execution trace side-by-side—viewing the raw BM25 query, the freshly hallucinated technical passage, LLM provider/model telemetry, wall-clock latency, and the $768$-dimensional `nomic-embed-text` vector preview (`vec[:5]`).
-* **Weighted 2-Hop Graph Expansion with $\epsilon$-Exploration**: Seeds Neo4j with top-ranked hybrid hits and traverses `MENTIONS`, `CITES`, and `RELATED_TO` synapses where weight $w_e \ge 0.2$, retaining a $5\%$ stochastic exploration probability for weaker edges while skipping pruned paths.
+* **Unified Multi-Modal Ingestion**: Parses PDFs via `PyMuPDF` into $\sim 300$-token overlapping chunks ($15\%$ overlap), preserves table headers across row splits, crops figures with automatic same-page section attribution and dark-background inversion OCR ($2\times$ upscaled Tesseract or optional VLM), and transcribes talk audio into $30\text{ s}$ timestamped windows via `faster-whisper`.
+* **Live, Teacher-Proof HyDE Observability**: Toggle `HyDE: ON / OFF` per query in the UI. Inspect the live split-query execution trace side-by-side—viewing the raw BM25 query, the freshly generated hypothetical passage, LLM provider/model telemetry, wall-clock latency, and the $768$-dimensional `nomic-embed-text` vector preview (`vec[:5]`).
+* **Weighted 2-Hop Graph Expansion with $\epsilon$-Exploration**: Seeds Neo4j with top-ranked hybrid hits and traverses `MENTIONS`, `CITES`, and `RELATED_TO` synapses where weight $w_e \ge 0.2$, retaining a $5\%$ stochastic exploration probability for weaker edges while skipping soft-pruned paths.
 * **Autonomous Synapse Pruning & $\alpha$-Adaptation**: Updates traversed edge weights once per query via an exponential moving average ($w_e \leftarrow 0.9 w_e + 0.1 s$), soft-prunes synapses falling below $0.28$ after $\ge 5$ visits, and shifts the hybrid fusion parameter $\alpha \in [0.2, 0.9]$ toward the stronger retriever.
-* **Strictly Grounded Generation & NLI Audit Chain**: Generates answers at $\text{temperature} = 0$ with mandatory inline evidence citations (`[E1]`, `[E2]`) mapped to exact PDF bounding-box crops or audio timestamps, followed by a claim-level Natural Language Inference (NLI) verification pass.
+* **Strictly Grounded Generation & NLI Audit Chain**: Generates answers at $\text{temperature} = 0$ with mandatory inline evidence citations (`[E1]`, `[E2]`) mapped to exact PDF bounding-box crops or audio timestamps, followed by a claim-level Natural Language Inference (NLI) entailment audit.
 
 ---
 
@@ -192,7 +213,7 @@ sequenceDiagram
 
 ---
 
-### Mathematical Formulation
+## Mathematical Formulation
 
 1. **Split-Query HyDE & Hybrid Fusion**:
    Given a raw user query $q$, BM25 scores lexical overlap directly on $q$, while the dense retriever embeds a hypothetical technical passage $\hat{d} = \text{LLM}_{T=0.7}(q)$ prefixed with `search_document:`:
@@ -229,6 +250,107 @@ sequenceDiagram
 
 ---
 
+## Empirical Validation & Benchmark Results
+
+ResearchOS is validated via a deterministic, zero-judge evaluation suite (`backend/scripts/evaluate_objectives.py`) over a 10-query multi-modal academic benchmark (`backend/scripts/benchmark_queries.json`) spanning `lexical`, `semantic`, `multi_modal_figure`, and `multi_hop` queries grounded in indexed BIM/AR-VR literature (`docs/arvr-1.pdf` and `docs/arvr-5.pdf`). All measurements derive directly from live Cohere `rerank-v3.5` cross-encoder relevance scores, Weaviate candidate intersections, Neo4j synapse states, and Module 4 NLI claim verification.
+
+Full report: **[`docs/evaluation/VALIDATION_REPORT.md`](docs/evaluation/VALIDATION_REPORT.md)** | Raw query metrics: **[`docs/evaluation/metrics_summary.csv`](docs/evaluation/metrics_summary.csv)**
+
+### 1. Overall Baseline Progression
+
+| System Configuration | Mean $S_{\text{rerank}}$ (Top-5) | Max $S_{\text{rerank}}$ (Top-1) | Precision@5 ($s \ge 0.30$) | Cross-Modal $\text{HR}_{\text{MM}}@5$ | NLI Claim Faithfulness |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **B2: Vanilla Dense RAG (`b2_dense`, HyDE OFF)** | $0.6176$ | $0.6835$ | $98.0\%$ | $50.0\%$ | — |
+| **B1: BM25 Lexical Only (`b1_bm25`)** | $0.6406$ | $0.7234$ | $100.0\%$ | $100.0\%$ | — |
+| **B4: Static GraphRAG (`b4_static_graph`, HyDE OFF)** | $0.6519$ | $0.7090$ | $100.0\%$ | $100.0\%$ | — |
+| **ResearchOS Full (Split-Query HyDE + Self-Pruning)** | **$0.6718$** | **$0.7336$** | **$100.0\%$** | **$100.0\%$** | **$100.0\%$ ($32/32$)** |
+
+![Overall Baseline Comparison](docs/evaluation/plots/overall_baseline_comparison.png)
+
+---
+
+### 2. Objective-Wise Findings & Visual Proofs
+
+#### Objective 1: Multi-Modal Ingestion & Lexical-Semantic Complementarity
+* **Indexed Knowledge Base**: $216$ unified Weaviate vector items ($198$ text chunks, $18$ extracted figure/diagram items) linked across $478$ `Concept` nodes, $805$ `MENTIONS` synapses, and $199$ `RELATED_TO` synapses in Neo4j.
+* **Cross-Modal Figure Hit Rate ($\text{HR}_{\text{MM}}@5$)**: Achieves **$100.0\%$ ($2/2$)** on figure-targeted queries (`Q03` retrieving `Figure 1: Workflow of Indoor Navigation` from `arvr-5.pdf` and `Q04` retrieving `Fig. 1: Diagram of the indoor navigation method` from `arvr-1.pdf`), outperforming Vanilla Dense ($50.0\%$) via same-page section attribution and dark-background-inverted $2\times$ Tesseract OCR.
+* **Pre-Fusion Complementarity ($1 - \text{Jaccard}$)**: Across all 10 benchmark queries, mean pre-fusion Jaccard overlap between top-20 BM25 and top-20 Dense candidates is **$0.3675$**, yielding a **Lexical-Semantic Complementarity of $0.6325$ ($63.25\%$)** (reaching **$88.89\%$** on `Q01` and `Q02`).
+
+![Objective 1 Multi-Modal Complementarity](docs/evaluation/plots/obj1_multimodal_complementarity.png)
+
+#### Objective 2: Split-Query HyDE Pre-Retrieval Augmentation
+* **Cross-Encoder Relevance Lift**: Split-Query HyDE raises mean top-5 Cohere `rerank-v3.5` relevance from **$0.6176$** (Vanilla Dense) and **$0.6519$** (Static Graph, HyDE OFF) to **$0.6718$** (**$+8.42\%$ lift over Vanilla Dense**), while boosting peak top-1 relevance to **$0.7336$**.
+* **Bridging Severe Vocabulary Gaps**: On terse, schema-heavy query `Q01` (*"IfcSpace BIM indoor navigation turnstile"*), HyDE boosts top-5 mean relevance from **$0.5559 \rightarrow 0.7092$ ($\Delta = +0.1533$, $+27.6\%$)** with a transparent mean generation latency overhead of $1,374\text{ ms}$.
+
+![Objective 2 HyDE Ablation](docs/evaluation/plots/obj2_hyde_ablation.png)
+
+#### Objective 3: Self-Pruning Agentic Memory & Grounded NLI Verification
+* **Autonomous Graph Denoising ($3$-State Progression)**:
+  * **Initial Baseline ($w_0 = 0.5000$)**: $805$ `MENTIONS` edges, $0$ visits, $0$ pruned.
+  * **Pre-Run State**: Mean weight $0.4699$ across $833$ visits, $4$ noisy edges soft-pruned.
+  * **Post-Run State ($2,780$ cumulative visits)**: Mean weight $0.4392$, **$16$ noisy synapses soft-pruned ($GNRR = 2.0\%$)** after decaying below $\tau = 0.28$ at $\ge 5$ visits. High-utility context edges were reinforced up to **$0.6840$** while pruned pathways decayed to **$0.2312$**.
+* **Deterministic Denoising Trajectory**: Under frozen query embeddings (`seed=42`), pruning noisy graph pathways monotonically improves candidate pool quality across passes ($0.6529 \rightarrow 0.6542 \rightarrow \mathbf{0.6551}$).
+* **Adaptive $\alpha$ Convergence & $100\%$ NLI Faithfulness**: The fusion controller autonomously shifted $\alpha$ from **$0.5156 \rightarrow 0.3385$** ($\sim 66\%$ lexical / $34\%$ dense weighting) to reflect higher BM25 precision on exact BIM/IFC identifiers, while Module 4 verified **$32 / 32$ generated claims ($100.0\%$ NLI faithfulness)** with zero unsupported citations.
+
+![Objective 3 Pruning Progression](docs/evaluation/plots/obj3_pruning_progression.png)
+
+### 3. Reproducing the Validation Suite
+
+```bash
+# Regenerate Markdown report, CSV metrics, and all 4 high-DPI plots from cached telemetry (0 API calls)
+docker exec graph-rag-audio_fix-backend-1 python /app/scripts/evaluate_objectives.py --mode report
+
+# Run full live evaluation against Weaviate, Neo4j, Groq, and Cohere with 8s rate-limit pacing
+docker exec graph-rag-audio_fix-backend-1 python /app/scripts/evaluate_objectives.py --mode live --pace 8
+```
+
+---
+
+## Repository Structure
+
+```text
+Graph-RAG/
+├── backend/
+│   ├── models/                  # Pydantic schemas for ingestion, query, HyDE telemetry & admin state
+│   ├── routers/                 # FastAPI endpoints (/ingest, /query, /graph, /admin)
+│   ├── scripts/
+│   │   ├── benchmark_queries.json    # 10 curated multi-modal & multi-hop benchmark queries
+│   │   ├── evaluate_objectives.py    # Low-compute evaluation harness & Matplotlib chart generator
+│   │   ├── eval_cache.json           # Cached live query responses & reranker telemetry
+│   │   └── pre_eval_snapshot.json    # Pre-evaluation Neo4j synapse weight backup (1,004 edges)
+│   ├── services/
+│   │   ├── pdf_extractor.py          # PyMuPDF parser, table splitter & dark-bg 2x OCR figure extractor
+│   │   ├── audio_transcriber.py      # Faster-Whisper ASR with 30s timestamped window merging
+│   │   ├── concept_extractor.py      # LLM entity/relation JSON extraction & CITES linker
+│   │   ├── hyde.py                   # Split-Query HyDE generator (Ollama-first -> Groq fallback)
+│   │   ├── weaviate_client.py        # Unified 'Chunk' hybrid BM25 + HNSW dense retrieval
+│   │   ├── neo4j_client.py           # 2-hop weighted Cypher traversal with 5% epsilon-exploration
+│   │   ├── reranker.py               # Cohere rerank-v3.5 cross-encoder integration
+│   │   ├── feedback.py               # Exponential moving average synapse updater, pruner & alpha tuner
+│   │   ├── generator.py              # Temperature=0 grounded answer generator & NLI claim verifier
+│   │   └── pipeline.py               # End-to-end orchestrator + baseline & ablation configurations
+│   ├── tests/                   # Deterministic unit & database integration test suites
+│   ├── config.py                # Centralized environment & hyperparameter configuration
+│   └── main.py                  # FastAPI application entrypoint
+├── frontend/
+│   └── src/
+│       ├── components/          # QueryBar (HyDE toggle), AnswerCard (HyDE Inspector & NLI Audit),
+│       │                        # GraphExplorer, AgenticMemory, IngestionStudio, ClearDBButton
+│       ├── hooks/               # useQuery & API polling hooks
+│       └── App.tsx              # Main 4-workspace single-page application
+├── docs/
+│   ├── arvr-1.pdf & arvr-5.pdf  # Sample indexed BIM & AR/VR indoor navigation research papers
+│   ├── evaluation/
+│   │   ├── VALIDATION_REPORT.md # Full empirical validation report across Objectives 1, 2, and 3
+│   │   ├── metrics_summary.csv  # Per-query quantitative breakdown across B1, B2, B4, and Full
+│   │   └── plots/               # 4 publication-grade high-DPI evaluation charts (.png)
+│   └── snapshots/               # Live UI screenshots (search_qa.png, knowledge_graph.png, memory.png)
+├── docker-compose.yml           # 5-service containerized stack (Frontend, Backend, Weaviate, Neo4j, Ollama)
+└── README.md
+```
+
+---
+
 ## Quick Start
 
 ### 1. Configure Environment
@@ -261,7 +383,7 @@ docker compose up -d --build
 
 1. **Search & QA**:
    * Query across PDFs, extracted figures, and audio transcripts.
-   * **Live HyDE Toggle**: Switch `HyDE: ON / OFF` directly in the Omnibar or switch across evaluation baselines (`B1`–`B5`) and ablations (`abl_*`).
+   * **Live HyDE Toggle**: Switch `HyDE: ON / OFF` directly in the Omnibar or switch across evaluation baselines (`b1_bm25`, `b2_dense`, `b4_static_graph`) and ablations (`abl_*`).
    * **HyDE Inspector Drawer**: Click `HyDE Active` on any response card to inspect the exact `bm25_query`, the generated `hypothetical_doc` (clearly badged as never used as answer evidence), active LLM provider/model, wall-clock latency, and $768$-dim vector preview (`vec[:5]`).
    * **NLI Audit Chain**: Expand `Audit Chain` to view sentence-by-sentence entailment verification against cited source IDs.
 2. **Graph Explorer**:
@@ -317,7 +439,7 @@ Interactive OpenAPI / Swagger documentation is available at **`http://localhost:
 | `POST /ingest/pdf`<br/>`POST /ingest/audio` | `multipart/form-data` | Upload PDF or audio recording; queued in background thread pool |
 | `GET /ingest/status/{id}`<br/>`GET /ingest/jobs` | Path `id` | Poll live ingestion stage, elapsed seconds, warnings, and entity counts |
 | `POST /query` | `{text, system?, learn?, seed?, verify?, hyde?}` | Execute RAG pipeline; returns answer, cited sources, figure crops, NLI claims, and `diagnostics` (including live `diagnostics.hyde` trace) |
-| `GET /query/systems` | None | Lists `full` system alongside baselines (`B1`–`B5`) and ablations (`abl_*`) |
+| `GET /query/systems` | None | Lists `full` system alongside baselines (`b1_bm25`, `b2_dense`, `b4_static_graph`) and ablations (`abl_*`) |
 | `GET /graph` | Optional filters | Returns Neo4j nodes and weighted/pruned edges for Graph Explorer |
 | `GET /admin/state`<br/>`GET /admin/audit` | None | Inspect live $\alpha$, synapse statistics, prune counts, and audit log |
 | `POST /admin/reset-feedback`<br/>`POST /admin/restore-pruned`<br/>`GET/POST /admin/snapshot` | Snapshot JSON | Freeze, reset, restore soft-pruned edges, or snapshot agentic memory |
@@ -360,10 +482,10 @@ RESEARCHOS_ALLOW_WIPE=1 WEAVIATE_URL=http://localhost:18080 NEO4J_URI=bolt://loc
 
 | Initial Phase Report Design | Final Production Implementation | Engineering Justification |
 | :--- | :--- | :--- |
-| **Ragas Evaluation Harness (Module 5)** | **Deprecated & Removed**; replaced with **Split-Query HyDE + Live UI Inspector** | Ragas incurred prohibitive LLM-judge compute and rate-limit overhead; Split-Query HyDE directly boosts dense recall on academic prose while preserving exact BM25 keyword hits and real-time UI explainability. |
+| **Ragas Evaluation Harness (Module 5)** | **Deprecated & Removed**; replaced with **Split-Query HyDE + Live Telemetry Benchmark** | Ragas incurred prohibitive LLM-judge compute and rate-limit overhead; Split-Query HyDE directly boosts dense recall ($+8.42\%$ over Vanilla Dense) while preserving exact BM25 keyword hits and real-time UI explainability. |
 | **Llama-3.1-8B Local-Only** | **Hybrid Provider (`groq` / `ollama`)**; HyDE tries Ollama first with automatic Groq fallback | Enables smooth execution on laptops without dedicated GPUs while supporting $100\%$ local execution when Ollama chat models are pulled. |
 | **BGE-base Embeddings** | **`nomic-embed-text` ($768$-dim)** via Ollama with `search_query:` / `search_document:` prefixes | Native to the containerized Ollama service; explicit task prefixes align generated HyDE passages with stored document chunks in vector space. |
-| **Mandatory VLM Figure Descriptions** | **Dark-BG-Aware $2\times$ Tesseract OCR + Same-Page Section Heading** (VLM optional) | Zero extra VRAM/disk overhead and fast ingestion while accurately indexing white-on-charcoal architecture diagrams (e.g., Unity workflow flowcharts). |
+| **Mandatory VLM Figure Descriptions** | **Dark-BG-Aware $2\times$ Tesseract OCR + Same-Page Section Heading** (VLM optional) | Zero extra VRAM/disk overhead and fast ingestion while achieving $100\%$ $\text{HR}_{\text{MM}}@5$ on white-on-charcoal architecture diagrams. |
 | **Streamlit Prototype UI** | **React + Vite + Tailwind v4 SPA** (`Search & QA`, `Graph Explorer`, `Agentic Memory`, `Ingestion Studio`) | Enables interactive force-directed graph inspection, per-query `HyDE: ON/OFF` toggling, live vector preview drawers, and NLI claim auditing. |
 | **Per-Path Edge Updates** | **Once-Per-Query Edge Update** using mean reranker score of reached candidates | Prevents a single multi-path query from incrementing an edge's visit counter multiple times and prematurely triggering the $5$-visit pruning rule. |
 
@@ -376,3 +498,16 @@ RESEARCHOS_ALLOW_WIPE=1 WEAVIATE_URL=http://localhost:18080 NEO4J_URI=bolt://loc
 * **Running 100% Local Generation with Ollama**: Pull Llama 3.1 into the running Ollama container (`docker compose exec ollama ollama pull llama3.1:8b`) and set `LLM_PROVIDER=ollama` in `.env`.
 * **Groq Free-Tier Pacing**: Concept extraction on large PDFs under Groq's free tier is paced by output-tokens-per-minute (OTPM) limits (`max_tokens=600` per batch); switching `LLM_PROVIDER=ollama` removes external rate limits on GPU-equipped workstations.
 * **Heuristic Figure Detection**: PDF figure cropping targets captioned figures; decorative images without detectable captions are intentionally skipped to prevent index pollution.
+
+---
+
+## Project Team
+
+**Department of Computer Science and Engineering (Artificial Intelligence & Machine Learning)**  
+**Ramaiah Institute of Technology, Bengaluru**
+
+| Team Member | USN |
+| :--- | :--- |
+| **Naveen G Patil** | `1MS23CI073` |
+| **Prathamesh Sutar** | `1MS23CI092` |
+| **Navya Agrawal** | `1MS23CI074` |

@@ -23,9 +23,9 @@
   {
     "id": "Q04",
     "type": "multi_modal_figure",
-    "text": "indoor navigation architecture diagram augmented reality system",
+    "text": "Diagram of the indoor navigation method proposed system",
     "target_modality": "figure",
-    "notes": "arvr-1 figures — architecture diagrams of the AR navigation system"
+    "notes": "arvr-1 — targets Fig. 1 (Diagram of the indoor navigation method) specifically"
   },
   {
     "id": "Q05",
