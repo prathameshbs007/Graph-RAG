@@ -1,0 +1,73 @@
+[
+  {
+    "id": "Q01",
+    "type": "lexical",
+    "text": "IfcSpace BIM indoor navigation turnstile",
+    "target_modality": "text",
+    "notes": "arvr-1 specific — BIM schema terminology; exact lexical match expected"
+  },
+  {
+    "id": "Q02",
+    "type": "semantic",
+    "text": "How does building information modelling support indoor wayfinding?",
+    "target_modality": "text",
+    "notes": "arvr-1 — requires semantic understanding of BIM + wayfinding relationship"
+  },
+  {
+    "id": "Q03",
+    "type": "multi_modal_figure",
+    "text": "Unity Implementation Framework workflow diagram indoor navigation",
+    "target_modality": "figure",
+    "notes": "arvr-5 — targets Figure 1 (Workflow of Indoor Navigation) specifically"
+  },
+  {
+    "id": "Q04",
+    "type": "multi_modal_figure",
+    "text": "indoor navigation architecture diagram augmented reality system",
+    "target_modality": "figure",
+    "notes": "arvr-1 figures — architecture diagrams of the AR navigation system"
+  },
+  {
+    "id": "Q05",
+    "type": "semantic",
+    "text": "QR code localization method for indoor positioning system",
+    "target_modality": "text",
+    "notes": "arvr-5 — QR code and localization concepts"
+  },
+  {
+    "id": "Q06",
+    "type": "lexical",
+    "text": "turnstile gate passenger flow IFC element spatial model",
+    "target_modality": "text",
+    "notes": "arvr-1 — IFC + turnstile exact terminology for lexical retrieval"
+  },
+  {
+    "id": "Q07",
+    "type": "multi_hop",
+    "text": "How does spatial mapping in Unity relate to BIM coordinate systems for AR navigation?",
+    "target_modality": "text",
+    "notes": "cross-paper multi-hop: arvr-5 Unity + arvr-1 BIM spatial coordinate systems"
+  },
+  {
+    "id": "Q08",
+    "type": "semantic",
+    "text": "pedestrian simulation subway plaza evacuation route planning",
+    "target_modality": "text",
+    "notes": "arvr-1 — evacuation and pedestrian simulation in subway plaza context"
+  },
+  {
+    "id": "Q09",
+    "type": "multi_hop",
+    "text": "What algorithms are used for shortest path computation in AR indoor navigation applications?",
+    "target_modality": "text",
+    "notes": "cross-paper: pathfinding algorithms in both docs; requires graph traversal"
+  },
+  {
+    "id": "Q10",
+    "type": "lexical",
+    "text": "Unity AR SDK marker detection coordinate transformation tracking",
+    "target_modality": "text",
+    "notes": "arvr-5 — Unity AR marker detection; generic overlapping terms trigger noisy edges for Obj 3"
+  }
+]
+

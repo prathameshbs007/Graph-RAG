@@ -1,0 +1,1994 @@
+{
+  "phase1": {
+    "modality_counts": {
+      "text": 198,
+      "image": 18
+    },
+    "total_vector_items": 216,
+    "neo4j_nodes": {
+      "Concept": 478,
+      "FeedbackEvent": 1094,
+      "SystemState": 1,
+      "Paper": 3,
+      "Author": 1,
+      "Item": 143,
+      "Chunk": 133,
+      "Figure": 10
+    },
+    "neo4j_edges": {
+      "RELATED_TO": {
+        "total": 199,
+        "pruned": 0,
+        "avg_weight": 0.4653,
+        "visits": 228
+      },
+      "MENTIONS": {
+        "total": 805,
+        "pruned": 4,
+        "avg_weight": 0.4699,
+        "visits": 833
+      }
+    },
+    "alpha": 0.5156
+  },
+  "phase2": {
+    "Q01": {
+      "query": "IfcSpace BIM indoor navigation turnstile",
+      "type": "lexical",
+      "bm25_ids": [
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t25",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t25",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t26",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t26",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t9",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t9",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t8",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t8",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t7",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t7"
+      ],
+      "dense_ids": [
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t8",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t8",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t3",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t3",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t22",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t22",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t19",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t19",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t59",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t59"
+      ],
+      "overlap_count": 2,
+      "union_count": 18,
+      "jaccard": 0.1111,
+      "complementarity": 0.8889,
+      "b1": {
+        "top5_scores": [
+          0.7943,
+          0.7943,
+          0.5915,
+          0.5915,
+          0.5764
+        ],
+        "mean_rerank": 0.6696,
+        "max_rerank": 0.7943,
+        "p5": 1.0,
+        "hr_mm5": 0
+      },
+      "b2": {
+        "top5_scores": [
+          0.5915,
+          0.5915,
+          0.5603,
+          0.5603,
+          0.4941
+        ],
+        "mean_rerank": 0.5595,
+        "max_rerank": 0.5915,
+        "p5": 1.0,
+        "hr_mm5": 0
+      },
+      "b4": {
+        "top5_scores": [
+          0.5915,
+          0.5915,
+          0.5764,
+          0.5263,
+          0.4941
+        ],
+        "mean_rerank": 0.5559,
+        "max_rerank": 0.5915,
+        "p5": 1.0,
+        "hr_mm5": 0
+      }
+    },
+    "Q02": {
+      "query": "How does building information modelling support indoor wayfinding?",
+      "type": "semantic",
+      "bm25_ids": [
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t59",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t59",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t22",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t22",
+        "6ba0162f-20d2-4f90-b452-d061d2f27247:t1",
+        "9106d3f3-2d58-4dcf-90c7-9635e32f8cf3:t1",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t7",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t7",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t23",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t23"
+      ],
+      "dense_ids": [
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t22",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t22",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t4",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t4",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t3",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t3",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t11",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t11",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t12",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t12"
+      ],
+      "overlap_count": 2,
+      "union_count": 18,
+      "jaccard": 0.1111,
+      "complementarity": 0.8889,
+      "b1": {
+        "top5_scores": [
+          0.7077,
+          0.7077,
+          0.6359,
+          0.6359,
+          0.4331
+        ],
+        "mean_rerank": 0.6241,
+        "max_rerank": 0.7077,
+        "p5": 1.0,
+        "hr_mm5": 0
+      },
+      "b2": {
+        "top5_scores": [
+          0.7662,
+          0.7662,
+          0.7439,
+          0.7439,
+          0.7077
+        ],
+        "mean_rerank": 0.7456,
+        "max_rerank": 0.7662,
+        "p5": 1.0,
+        "hr_mm5": 0
+      },
+      "b4": {
+        "top5_scores": [
+          0.7662,
+          0.7077,
+          0.7077,
+          0.6706,
+          0.6359
+        ],
+        "mean_rerank": 0.6976,
+        "max_rerank": 0.7662,
+        "p5": 1.0,
+        "hr_mm5": 0
+      }
+    },
+    "Q03": {
+      "query": "Unity Implementation Framework workflow diagram indoor navigation",
+      "type": "multi_modal_figure",
+      "bm25_ids": [
+        "9106d3f3-2d58-4dcf-90c7-9635e32f8cf3_p3_f0",
+        "9106d3f3-2d58-4dcf-90c7-9635e32f8cf3:t11",
+        "6ba0162f-20d2-4f90-b452-d061d2f27247:t11",
+        "6ba0162f-20d2-4f90-b452-d061d2f27247_p3_f0",
+        "6ba0162f-20d2-4f90-b452-d061d2f27247:t0",
+        "9106d3f3-2d58-4dcf-90c7-9635e32f8cf3:t0",
+        "6ba0162f-20d2-4f90-b452-d061d2f27247:t10",
+        "9106d3f3-2d58-4dcf-90c7-9635e32f8cf3:t10",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60_p5_f1",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287_p5_f1"
+      ],
+      "dense_ids": [
+        "6ba0162f-20d2-4f90-b452-d061d2f27247:t11",
+        "6ba0162f-20d2-4f90-b452-d061d2f27247:t0",
+        "6ba0162f-20d2-4f90-b452-d061d2f27247:t1",
+        "6ba0162f-20d2-4f90-b452-d061d2f27247:t10",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t3",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t3",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t22",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t22",
+        "6ba0162f-20d2-4f90-b452-d061d2f27247_p3_f0",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t12"
+      ],
+      "overlap_count": 4,
+      "union_count": 16,
+      "jaccard": 0.25,
+      "complementarity": 0.75,
+      "b1": {
+        "top5_scores": [
+          0.8313,
+          0.8201,
+          0.8201,
+          0.6952,
+          0.6952
+        ],
+        "mean_rerank": 0.7724,
+        "max_rerank": 0.8313,
+        "p5": 1.0,
+        "hr_mm5": 1
+      },
+      "b2": {
+        "top5_scores": [
+          0.8201,
+          0.6952,
+          0.6145,
+          0.5046,
+          0.4967
+        ],
+        "mean_rerank": 0.6262,
+        "max_rerank": 0.8201,
+        "p5": 1.0,
+        "hr_mm5": 0
+      },
+      "b4": {
+        "top5_scores": [
+          0.8313,
+          0.8201,
+          0.8201,
+          0.695,
+          0.695
+        ],
+        "mean_rerank": 0.7723,
+        "max_rerank": 0.8313,
+        "p5": 1.0,
+        "hr_mm5": 1
+      }
+    },
+    "Q04": {
+      "query": "indoor navigation architecture diagram augmented reality system",
+      "type": "multi_modal_figure",
+      "bm25_ids": [
+        "6ba0162f-20d2-4f90-b452-d061d2f27247:t0",
+        "9106d3f3-2d58-4dcf-90c7-9635e32f8cf3:t0",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t3",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t3",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t19",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t19",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t29",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t29",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60_p5_f1",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287_p5_f1"
+      ],
+      "dense_ids": [
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t3",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t3",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t19",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t19",
+        "6ba0162f-20d2-4f90-b452-d061d2f27247:t0",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t59",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t59",
+        "6ba0162f-20d2-4f90-b452-d061d2f27247:t23",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t43",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t43"
+      ],
+      "overlap_count": 5,
+      "union_count": 15,
+      "jaccard": 0.3333,
+      "complementarity": 0.6667,
+      "b1": {
+        "top5_scores": [
+          0.8286,
+          0.8286,
+          0.8152,
+          0.8152,
+          0.7971
+        ],
+        "mean_rerank": 0.817,
+        "max_rerank": 0.8286,
+        "p5": 1.0,
+        "hr_mm5": 0
+      },
+      "b2": {
+        "top5_scores": [
+          0.8286,
+          0.8286,
+          0.8152,
+          0.8152,
+          0.7975
+        ],
+        "mean_rerank": 0.817,
+        "max_rerank": 0.8286,
+        "p5": 1.0,
+        "hr_mm5": 0
+      },
+      "b4": {
+        "top5_scores": [
+          0.8286,
+          0.8286,
+          0.8152,
+          0.8152,
+          0.7975
+        ],
+        "mean_rerank": 0.817,
+        "max_rerank": 0.8286,
+        "p5": 1.0,
+        "hr_mm5": 0
+      }
+    },
+    "Q05": {
+      "query": "QR code localization method for indoor positioning system",
+      "type": "semantic",
+      "bm25_ids": [
+        "9106d3f3-2d58-4dcf-90c7-9635e32f8cf3:t26",
+        "6ba0162f-20d2-4f90-b452-d061d2f27247:t26",
+        "6ba0162f-20d2-4f90-b452-d061d2f27247:t25",
+        "9106d3f3-2d58-4dcf-90c7-9635e32f8cf3:t25",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t16",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t16",
+        "9106d3f3-2d58-4dcf-90c7-9635e32f8cf3:t23",
+        "6ba0162f-20d2-4f90-b452-d061d2f27247:t23",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t17",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t17"
+      ],
+      "dense_ids": [
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t16",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t16",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t17",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t17",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t26",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t26",
+        "6ba0162f-20d2-4f90-b452-d061d2f27247:t25",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t8",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t8",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t3"
+      ],
+      "overlap_count": 5,
+      "union_count": 15,
+      "jaccard": 0.3333,
+      "complementarity": 0.6667,
+      "b1": {
+        "top5_scores": [
+          0.6865,
+          0.6865,
+          0.6628,
+          0.6628,
+          0.5769
+        ],
+        "mean_rerank": 0.6551,
+        "max_rerank": 0.6865,
+        "p5": 1.0,
+        "hr_mm5": 0
+      },
+      "b2": {
+        "top5_scores": [
+          0.6865,
+          0.6865,
+          0.6628,
+          0.6628,
+          0.562
+        ],
+        "mean_rerank": 0.6521,
+        "max_rerank": 0.6865,
+        "p5": 1.0,
+        "hr_mm5": 0
+      },
+      "b4": {
+        "top5_scores": [
+          0.6865,
+          0.6865,
+          0.6628,
+          0.6628,
+          0.5769
+        ],
+        "mean_rerank": 0.6551,
+        "max_rerank": 0.6865,
+        "p5": 1.0,
+        "hr_mm5": 0
+      }
+    },
+    "Q06": {
+      "query": "turnstile gate passenger flow IFC element spatial model",
+      "type": "lexical",
+      "bm25_ids": [
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t23",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t23",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60_p5_f2",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287_p5_f2",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t22",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t22",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t12",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t12",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t24",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t24"
+      ],
+      "dense_ids": [
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t23",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t23",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t24",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t24",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t25",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t25",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t22",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t22",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60_p5_f2",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287_p5_f2"
+      ],
+      "overlap_count": 8,
+      "union_count": 12,
+      "jaccard": 0.6667,
+      "complementarity": 0.3333,
+      "b1": {
+        "top5_scores": [
+          0.7116,
+          0.7116,
+          0.3258,
+          0.3258,
+          0.3064
+        ],
+        "mean_rerank": 0.4763,
+        "max_rerank": 0.7116,
+        "p5": 1.0,
+        "hr_mm5": 1
+      },
+      "b2": {
+        "top5_scores": [
+          0.7116,
+          0.7116,
+          0.6781,
+          0.6781,
+          0.3258
+        ],
+        "mean_rerank": 0.621,
+        "max_rerank": 0.7116,
+        "p5": 1.0,
+        "hr_mm5": 0
+      },
+      "b4": {
+        "top5_scores": [
+          0.7116,
+          0.7116,
+          0.6778,
+          0.6778,
+          0.3258
+        ],
+        "mean_rerank": 0.6209,
+        "max_rerank": 0.7116,
+        "p5": 1.0,
+        "hr_mm5": 0
+      }
+    },
+    "Q07": {
+      "query": "How does spatial mapping in Unity relate to BIM coordinate systems for AR navigation?",
+      "type": "multi_hop",
+      "bm25_ids": [
+        "9106d3f3-2d58-4dcf-90c7-9635e32f8cf3:t11",
+        "6ba0162f-20d2-4f90-b452-d061d2f27247:t11",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t59",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t59",
+        "6ba0162f-20d2-4f90-b452-d061d2f27247:t0",
+        "9106d3f3-2d58-4dcf-90c7-9635e32f8cf3:t0",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t26",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t26",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t35",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t35"
+      ],
+      "dense_ids": [
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t35",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t35",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t7",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t7",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t8",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t8",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t26",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t26",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t27",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t27"
+      ],
+      "overlap_count": 4,
+      "union_count": 16,
+      "jaccard": 0.25,
+      "complementarity": 0.75,
+      "b1": {
+        "top5_scores": [
+          0.7761,
+          0.7761,
+          0.5328,
+          0.5328,
+          0.5219
+        ],
+        "mean_rerank": 0.628,
+        "max_rerank": 0.7761,
+        "p5": 1.0,
+        "hr_mm5": 0
+      },
+      "b2": {
+        "top5_scores": [
+          0.5328,
+          0.5328,
+          0.3138,
+          0.3138,
+          0.2738
+        ],
+        "mean_rerank": 0.3934,
+        "max_rerank": 0.5328,
+        "p5": 0.8,
+        "hr_mm5": 0
+      },
+      "b4": {
+        "top5_scores": [
+          0.7761,
+          0.7761,
+          0.5327,
+          0.5327,
+          0.5209
+        ],
+        "mean_rerank": 0.6277,
+        "max_rerank": 0.7761,
+        "p5": 1.0,
+        "hr_mm5": 0
+      }
+    },
+    "Q08": {
+      "query": "pedestrian simulation subway plaza evacuation route planning",
+      "type": "semantic",
+      "bm25_ids": [
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t48",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t48",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t24",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t24",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t53",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t53",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t58",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t58",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t47",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t47"
+      ],
+      "dense_ids": [
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t53",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t53",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t48",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t48",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t58",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t58",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t49",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t49",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t60",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t60"
+      ],
+      "overlap_count": 6,
+      "union_count": 14,
+      "jaccard": 0.4286,
+      "complementarity": 0.5714,
+      "b1": {
+        "top5_scores": [
+          0.558,
+          0.558,
+          0.4602,
+          0.4602,
+          0.4135
+        ],
+        "mean_rerank": 0.49,
+        "max_rerank": 0.558,
+        "p5": 1.0,
+        "hr_mm5": 0
+      },
+      "b2": {
+        "top5_scores": [
+          0.558,
+          0.558,
+          0.4606,
+          0.4606,
+          0.46
+        ],
+        "mean_rerank": 0.4994,
+        "max_rerank": 0.558,
+        "p5": 1.0,
+        "hr_mm5": 0
+      },
+      "b4": {
+        "top5_scores": [
+          0.5577,
+          0.5577,
+          0.4605,
+          0.4599,
+          0.4599
+        ],
+        "mean_rerank": 0.4991,
+        "max_rerank": 0.5577,
+        "p5": 1.0,
+        "hr_mm5": 0
+      }
+    },
+    "Q09": {
+      "query": "What algorithms are used for shortest path computation in AR indoor navigation applications?",
+      "type": "multi_hop",
+      "bm25_ids": [
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t17",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t17",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t51",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t51",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t52",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t52",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t43",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t43",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t50",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t50"
+      ],
+      "dense_ids": [
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t51",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t51",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t17",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t17",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t43",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t43",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t19",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t19",
+        "6ba0162f-20d2-4f90-b452-d061d2f27247:t23",
+        "6ba0162f-20d2-4f90-b452-d061d2f27247:t1"
+      ],
+      "overlap_count": 6,
+      "union_count": 14,
+      "jaccard": 0.4286,
+      "complementarity": 0.5714,
+      "b1": {
+        "top5_scores": [
+          0.856,
+          0.856,
+          0.829,
+          0.829,
+          0.8191
+        ],
+        "mean_rerank": 0.8378,
+        "max_rerank": 0.856,
+        "p5": 1.0,
+        "hr_mm5": 0
+      },
+      "b2": {
+        "top5_scores": [
+          0.856,
+          0.856,
+          0.829,
+          0.829,
+          0.7649
+        ],
+        "mean_rerank": 0.8269,
+        "max_rerank": 0.856,
+        "p5": 1.0,
+        "hr_mm5": 0
+      },
+      "b4": {
+        "top5_scores": [
+          0.856,
+          0.856,
+          0.829,
+          0.829,
+          0.8191
+        ],
+        "mean_rerank": 0.8378,
+        "max_rerank": 0.856,
+        "p5": 1.0,
+        "hr_mm5": 0
+      }
+    },
+    "Q10": {
+      "query": "Unity AR SDK marker detection coordinate transformation tracking",
+      "type": "lexical",
+      "bm25_ids": [
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t27",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t27",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t40",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t40",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t35",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t35",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t42",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t42",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t19",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t19"
+      ],
+      "dense_ids": [
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t40",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t40",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t27",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t27",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t47",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t47",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t35",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t35",
+        "12add4e4-1fce-460a-bbba-4397d4d62b60:t42",
+        "01503b67-b56e-4784-b9de-2b9dd9c6a287:t42"
+      ],
+      "overlap_count": 8,
+      "union_count": 12,
+      "jaccard": 0.6667,
+      "complementarity": 0.3333,
+      "b1": {
+        "top5_scores": [
+          0.4594,
+          0.4594,
+          0.4458,
+          0.4458,
+          0.4175
+        ],
+        "mean_rerank": 0.4456,
+        "max_rerank": 0.4594,
+        "p5": 1.0,
+        "hr_mm5": 0
+      },
+      "b2": {
+        "top5_scores": [
+          0.4591,
+          0.4591,
+          0.4455,
+          0.4455,
+          0.4171
+        ],
+        "mean_rerank": 0.4453,
+        "max_rerank": 0.4591,
+        "p5": 1.0,
+        "hr_mm5": 0
+      },
+      "b4": {
+        "top5_scores": [
+          0.4594,
+          0.4594,
+          0.4458,
+          0.4458,
+          0.4175
+        ],
+        "mean_rerank": 0.4456,
+        "max_rerank": 0.4594,
+        "p5": 1.0,
+        "hr_mm5": 0
+      }
+    }
+  },
+  "phase3": {
+    "Q01_hydeOFF": {
+      "query": "IfcSpace BIM indoor navigation turnstile",
+      "type": "lexical",
+      "hyde_on": false,
+      "top5_scores": [
+        0.5915,
+        0.5915,
+        0.5764,
+        0.5263,
+        0.4941
+      ],
+      "mean_rerank": 0.5559,
+      "max_rerank": 0.5915,
+      "p5": 1.0,
+      "hr_mm5": 0,
+      "hyde_latency_ms": 0,
+      "hypothetical_doc": "",
+      "first_stage_ms": 167,
+      "total_ms": 167,
+      "bm25_pool_count": 13,
+      "dense_pool_count": 13,
+      "alpha": 0.5156
+    },
+    "Q01_hydeON": {
+      "query": "IfcSpace BIM indoor navigation turnstile",
+      "type": "lexical",
+      "hyde_on": true,
+      "top5_scores": [
+        0.7945,
+        0.7945,
+        0.7894,
+        0.5915,
+        0.5764
+      ],
+      "mean_rerank": 0.7092,
+      "max_rerank": 0.7945,
+      "p5": 1.0,
+      "hr_mm5": 0,
+      "hyde_latency_ms": 1133,
+      "hypothetical_doc": "In the context of IFC (Industry Foundation Classes) standards, the `IfcSpace` entity represents a topological subdivision of a building\u2019s interior, such as a room or a corridor, and serves as the prim",
+      "first_stage_ms": 1149,
+      "total_ms": 1149,
+      "bm25_pool_count": 14,
+      "dense_pool_count": 9,
+      "alpha": 0.5156
+    },
+    "Q02_hydeOFF": {
+      "query": "How does building information modelling support indoor wayfinding?",
+      "type": "semantic",
+      "hyde_on": false,
+      "top5_scores": [
+        0.7662,
+        0.7077,
+        0.7077,
+        0.6706,
+        0.6359
+      ],
+      "mean_rerank": 0.6976,
+      "max_rerank": 0.7662,
+      "p5": 1.0,
+      "hr_mm5": 0,
+      "hyde_latency_ms": 0,
+      "hypothetical_doc": "",
+      "first_stage_ms": 37,
+      "total_ms": 37,
+      "bm25_pool_count": 13,
+      "dense_pool_count": 13,
+      "alpha": 0.5156
+    },
+    "Q02_hydeON": {
+      "query": "How does building information modelling support indoor wayfinding?",
+      "type": "semantic",
+      "hyde_on": true,
+      "top5_scores": [
+        0.7662,
+        0.7077,
+        0.7077,
+        0.6706,
+        0.6359
+      ],
+      "mean_rerank": 0.6976,
+      "max_rerank": 0.7662,
+      "p5": 1.0,
+      "hr_mm5": 0,
+      "hyde_latency_ms": 1368,
+      "hypothetical_doc": "Building Information Modeling (BIM) facilitates indoor wayfinding by providing a semantically rich, three-dimensional digital twin that contains precise geometric data and metadata about spatial eleme",
+      "first_stage_ms": 1423,
+      "total_ms": 1423,
+      "bm25_pool_count": 13,
+      "dense_pool_count": 15,
+      "alpha": 0.5156
+    },
+    "Q03_hydeOFF": {
+      "query": "Unity Implementation Framework workflow diagram indoor navigation",
+      "type": "multi_modal_figure",
+      "hyde_on": false,
+      "top5_scores": [
+        0.8313,
+        0.8201,
+        0.8201,
+        0.6952,
+        0.6952
+      ],
+      "mean_rerank": 0.7724,
+      "max_rerank": 0.8313,
+      "p5": 1.0,
+      "hr_mm5": 1,
+      "hyde_latency_ms": 0,
+      "hypothetical_doc": "",
+      "first_stage_ms": 45,
+      "total_ms": 45,
+      "bm25_pool_count": 17,
+      "dense_pool_count": 12,
+      "alpha": 0.5156
+    },
+    "Q03_hydeON": {
+      "query": "Unity Implementation Framework workflow diagram indoor navigation",
+      "type": "multi_modal_figure",
+      "hyde_on": true,
+      "top5_scores": [
+        0.8313,
+        0.8201,
+        0.8201,
+        0.6952,
+        0.6952
+      ],
+      "mean_rerank": 0.7724,
+      "max_rerank": 0.8313,
+      "p5": 1.0,
+      "hr_mm5": 1,
+      "hyde_latency_ms": 1322,
+      "hypothetical_doc": "The Unity implementation framework for indoor navigation typically operates through a modular pipeline consisting of map data ingestion, spatial localization, pathfinding, and visual rendering. The wo",
+      "first_stage_ms": 1363,
+      "total_ms": 1363,
+      "bm25_pool_count": 18,
+      "dense_pool_count": 10,
+      "alpha": 0.5156
+    },
+    "Q04_hydeOFF": {
+      "query": "indoor navigation architecture diagram augmented reality system",
+      "type": "multi_modal_figure",
+      "hyde_on": false,
+      "top5_scores": [
+        0.8286,
+        0.8286,
+        0.8152,
+        0.8152,
+        0.7975
+      ],
+      "mean_rerank": 0.817,
+      "max_rerank": 0.8286,
+      "p5": 1.0,
+      "hr_mm5": 0,
+      "hyde_latency_ms": 0,
+      "hypothetical_doc": "",
+      "first_stage_ms": 34,
+      "total_ms": 34,
+      "bm25_pool_count": 14,
+      "dense_pool_count": 13,
+      "alpha": 0.5156
+    },
+    "Q04_hydeON": {
+      "query": "indoor navigation architecture diagram augmented reality system",
+      "type": "multi_modal_figure",
+      "hyde_on": true,
+      "top5_scores": [
+        0.8286,
+        0.8286,
+        0.8152,
+        0.8152,
+        0.7975
+      ],
+      "mean_rerank": 0.817,
+      "max_rerank": 0.8286,
+      "p5": 1.0,
+      "hr_mm5": 0,
+      "hyde_latency_ms": 1426,
+      "hypothetical_doc": "An indoor navigation augmented reality (AR) system typically employs a layered architecture consisting of a data acquisition layer for sensor fusion (IMU, Wi-Fi, BLE, or UWB), a mapping and localizati",
+      "first_stage_ms": 1463,
+      "total_ms": 1463,
+      "bm25_pool_count": 14,
+      "dense_pool_count": 10,
+      "alpha": 0.5156
+    },
+    "Q05_hydeOFF": {
+      "query": "QR code localization method for indoor positioning system",
+      "type": "semantic",
+      "hyde_on": false,
+      "top5_scores": [
+        0.6865,
+        0.6865,
+        0.6628,
+        0.6628,
+        0.5769
+      ],
+      "mean_rerank": 0.6551,
+      "max_rerank": 0.6865,
+      "p5": 1.0,
+      "hr_mm5": 0,
+      "hyde_latency_ms": 0,
+      "hypothetical_doc": "",
+      "first_stage_ms": 39,
+      "total_ms": 39,
+      "bm25_pool_count": 14,
+      "dense_pool_count": 14,
+      "alpha": 0.5156
+    },
+    "Q05_hydeON": {
+      "query": "QR code localization method for indoor positioning system",
+      "type": "semantic",
+      "hyde_on": true,
+      "top5_scores": [
+        0.6865,
+        0.6865,
+        0.6628,
+        0.6628,
+        0.5769
+      ],
+      "mean_rerank": 0.6551,
+      "max_rerank": 0.6865,
+      "p5": 1.0,
+      "hr_mm5": 0,
+      "hyde_latency_ms": 1618,
+      "hypothetical_doc": "QR code localization within indoor positioning systems typically employs a monocular vision algorithm that utilizes the four corner points of the code to establish a homography matrix, thereby mapping",
+      "first_stage_ms": 1669,
+      "total_ms": 1669,
+      "bm25_pool_count": 14,
+      "dense_pool_count": 12,
+      "alpha": 0.5156
+    },
+    "Q06_hydeOFF": {
+      "query": "turnstile gate passenger flow IFC element spatial model",
+      "type": "lexical",
+      "hyde_on": false,
+      "top5_scores": [
+        0.7116,
+        0.7116,
+        0.6778,
+        0.6778,
+        0.3258
+      ],
+      "mean_rerank": 0.6209,
+      "max_rerank": 0.7116,
+      "p5": 1.0,
+      "hr_mm5": 0,
+      "hyde_latency_ms": 0,
+      "hypothetical_doc": "",
+      "first_stage_ms": 33,
+      "total_ms": 33,
+      "bm25_pool_count": 10,
+      "dense_pool_count": 10,
+      "alpha": 0.5156
+    },
+    "Q06_hydeON": {
+      "query": "turnstile gate passenger flow IFC element spatial model",
+      "type": "lexical",
+      "hyde_on": true,
+      "top5_scores": [
+        0.7116,
+        0.7116,
+        0.6781,
+        0.6781,
+        0.3258
+      ],
+      "mean_rerank": 0.621,
+      "max_rerank": 0.7116,
+      "p5": 1.0,
+      "hr_mm5": 0,
+      "hyde_latency_ms": 1292,
+      "hypothetical_doc": "In the International Function Classification (IFC) spatial model, turnstile gates are represented as `IfcFlowTerminal` elements that define the boundary conditions for pedestrian traffic within a buil",
+      "first_stage_ms": 1340,
+      "total_ms": 1340,
+      "bm25_pool_count": 10,
+      "dense_pool_count": 11,
+      "alpha": 0.5156
+    },
+    "Q07_hydeOFF": {
+      "query": "How does spatial mapping in Unity relate to BIM coordinate systems for AR navigation?",
+      "type": "multi_hop",
+      "hyde_on": false,
+      "top5_scores": [
+        0.7761,
+        0.7761,
+        0.5327,
+        0.5327,
+        0.5209
+      ],
+      "mean_rerank": 0.6277,
+      "max_rerank": 0.7761,
+      "p5": 1.0,
+      "hr_mm5": 0,
+      "hyde_latency_ms": 0,
+      "hypothetical_doc": "",
+      "first_stage_ms": 54,
+      "total_ms": 54,
+      "bm25_pool_count": 15,
+      "dense_pool_count": 14,
+      "alpha": 0.5156
+    },
+    "Q07_hydeON": {
+      "query": "How does spatial mapping in Unity relate to BIM coordinate systems for AR navigation?",
+      "type": "multi_hop",
+      "hyde_on": true,
+      "top5_scores": [
+        0.5327,
+        0.5327,
+        0.4922,
+        0.4922,
+        0.3551
+      ],
+      "mean_rerank": 0.481,
+      "max_rerank": 0.5327,
+      "p5": 1.0,
+      "hr_mm5": 0,
+      "hyde_latency_ms": 1746,
+      "hypothetical_doc": "Spatial mapping in Unity generates a local, device-centric mesh and coordinate system that must be explicitly transformed into the Building Information Modeling (BIM) global coordinate system to ensur",
+      "first_stage_ms": 1788,
+      "total_ms": 1788,
+      "bm25_pool_count": 10,
+      "dense_pool_count": 11,
+      "alpha": 0.5156
+    },
+    "Q08_hydeOFF": {
+      "query": "pedestrian simulation subway plaza evacuation route planning",
+      "type": "semantic",
+      "hyde_on": false,
+      "top5_scores": [
+        0.5577,
+        0.5577,
+        0.4605,
+        0.4599,
+        0.4599
+      ],
+      "mean_rerank": 0.4991,
+      "max_rerank": 0.5577,
+      "p5": 1.0,
+      "hr_mm5": 0,
+      "hyde_latency_ms": 0,
+      "hypothetical_doc": "",
+      "first_stage_ms": 62,
+      "total_ms": 62,
+      "bm25_pool_count": 13,
+      "dense_pool_count": 12,
+      "alpha": 0.5156
+    },
+    "Q08_hydeON": {
+      "query": "pedestrian simulation subway plaza evacuation route planning",
+      "type": "semantic",
+      "hyde_on": true,
+      "top5_scores": [
+        0.5577,
+        0.5577,
+        0.4605,
+        0.4599,
+        0.4599
+      ],
+      "mean_rerank": 0.4991,
+      "max_rerank": 0.5577,
+      "p5": 1.0,
+      "hr_mm5": 0,
+      "hyde_latency_ms": 976,
+      "hypothetical_doc": "Pedestrian simulation models, such as the Social Force Model or Cellular Automata, are essential for optimizing subway plaza evacuation by capturing the complex dynamics of crowd flow, including lane ",
+      "first_stage_ms": 1000,
+      "total_ms": 1000,
+      "bm25_pool_count": 13,
+      "dense_pool_count": 13,
+      "alpha": 0.5156
+    },
+    "Q09_hydeOFF": {
+      "query": "What algorithms are used for shortest path computation in AR indoor navigation applications?",
+      "type": "multi_hop",
+      "hyde_on": false,
+      "top5_scores": [
+        0.856,
+        0.856,
+        0.829,
+        0.829,
+        0.8191
+      ],
+      "mean_rerank": 0.8378,
+      "max_rerank": 0.856,
+      "p5": 1.0,
+      "hr_mm5": 0,
+      "hyde_latency_ms": 0,
+      "hypothetical_doc": "",
+      "first_stage_ms": 49,
+      "total_ms": 49,
+      "bm25_pool_count": 13,
+      "dense_pool_count": 12,
+      "alpha": 0.5156
+    },
+    "Q09_hydeON": {
+      "query": "What algorithms are used for shortest path computation in AR indoor navigation applications?",
+      "type": "multi_hop",
+      "hyde_on": true,
+      "top5_scores": [
+        0.8835,
+        0.8835,
+        0.856,
+        0.856,
+        0.829
+      ],
+      "mean_rerank": 0.8616,
+      "max_rerank": 0.8835,
+      "p5": 1.0,
+      "hr_mm5": 0,
+      "hyde_latency_ms": 1380,
+      "hypothetical_doc": "Indoor navigation systems typically model the facility layout as a weighted directed graph, where nodes represent significant locations (e.g., doors, corners, elevators) and edge weights correspond to",
+      "first_stage_ms": 1398,
+      "total_ms": 1398,
+      "bm25_pool_count": 15,
+      "dense_pool_count": 14,
+      "alpha": 0.5156
+    },
+    "Q10_hydeOFF": {
+      "query": "Unity AR SDK marker detection coordinate transformation tracking",
+      "type": "lexical",
+      "hyde_on": false,
+      "top5_scores": [
+        0.4594,
+        0.4594,
+        0.4458,
+        0.4458,
+        0.4175
+      ],
+      "mean_rerank": 0.4456,
+      "max_rerank": 0.4594,
+      "p5": 1.0,
+      "hr_mm5": 0,
+      "hyde_latency_ms": 0,
+      "hypothetical_doc": "",
+      "first_stage_ms": 41,
+      "total_ms": 41,
+      "bm25_pool_count": 15,
+      "dense_pool_count": 12,
+      "alpha": 0.5156
+    },
+    "Q10_hydeON": {
+      "query": "Unity AR SDK marker detection coordinate transformation tracking",
+      "type": "lexical",
+      "hyde_on": true,
+      "top5_scores": [
+        0.4594,
+        0.4594,
+        0.4458,
+        0.4458,
+        0.4175
+      ],
+      "mean_rerank": 0.4456,
+      "max_rerank": 0.4594,
+      "p5": 1.0,
+      "hr_mm5": 0,
+      "hyde_latency_ms": 1482,
+      "hypothetical_doc": "In Unity\u2019s AR Foundation framework, marker detection relies on the underlying platform SDK (such as ARCore or ARKit) to estimate the pose of a physical target relative to the device\u2019s camera coordinat",
+      "first_stage_ms": 1518,
+      "total_ms": 1518,
+      "bm25_pool_count": 15,
+      "dense_pool_count": 14,
+      "alpha": 0.5156
+    }
+  },
+  "phase4": {
+    "pre_run_state": {
+      "alpha": 0.5156,
+      "edges": {
+        "RELATED_TO": {
+          "total": 199,
+          "pruned": 0,
+          "avg_weight": 0.4653,
+          "visits": 228
+        },
+        "MENTIONS": {
+          "total": 805,
+          "pruned": 4,
+          "avg_weight": 0.4699,
+          "visits": 833
+        }
+      }
+    },
+    "pass0_Q01": {
+      "pass": 0,
+      "query": "IfcSpace BIM indoor navigation turnstile",
+      "type": "lexical",
+      "top5_scores": [
+        0.7945,
+        0.7945,
+        0.5915,
+        0.5915,
+        0.5764
+      ],
+      "mean_rerank": 0.6697,
+      "max_rerank": 0.7945,
+      "p5": 1.0,
+      "hr_mm5": 0,
+      "faithfulness_nli": 0.0,
+      "total_claims": 0,
+      "supported_claims": 0,
+      "unsupported_claims": 0,
+      "zero_unsupported": 1,
+      "edges_updated": 111,
+      "edges_pruned": 1,
+      "alpha_before": 0.5156,
+      "alpha_after": 0.5156
+    },
+    "pass0_Q02": {
+      "pass": 0,
+      "query": "How does building information modelling support indoor wayfinding?",
+      "type": "semantic",
+      "top5_scores": [
+        0.7662,
+        0.7439,
+        0.7077,
+        0.7077,
+        0.6706
+      ],
+      "mean_rerank": 0.7192,
+      "max_rerank": 0.7662,
+      "p5": 1.0,
+      "hr_mm5": 0,
+      "faithfulness_nli": 1.0,
+      "total_claims": 4,
+      "supported_claims": 4,
+      "unsupported_claims": 0,
+      "zero_unsupported": 1,
+      "edges_updated": 56,
+      "edges_pruned": 0,
+      "alpha_before": 0.5156,
+      "alpha_after": 0.5156
+    },
+    "pass0_Q03": {
+      "pass": 0,
+      "query": "Unity Implementation Framework workflow diagram indoor navigation",
+      "type": "multi_modal_figure",
+      "top5_scores": [
+        0.8313,
+        0.8201,
+        0.8201,
+        0.6952,
+        0.6952
+      ],
+      "mean_rerank": 0.7724,
+      "max_rerank": 0.8313,
+      "p5": 1.0,
+      "hr_mm5": 1,
+      "faithfulness_nli": 1.0,
+      "total_claims": 2,
+      "supported_claims": 2,
+      "unsupported_claims": 0,
+      "zero_unsupported": 1,
+      "edges_updated": 96,
+      "edges_pruned": 1,
+      "alpha_before": 0.5156,
+      "alpha_after": 0.5009
+    },
+    "pass0_Q04": {
+      "pass": 0,
+      "query": "indoor navigation architecture diagram augmented reality system",
+      "type": "multi_modal_figure",
+      "top5_scores": [
+        0.8286,
+        0.8286,
+        0.8152,
+        0.8152,
+        0.7975
+      ],
+      "mean_rerank": 0.817,
+      "max_rerank": 0.8286,
+      "p5": 1.0,
+      "hr_mm5": 0,
+      "faithfulness_nli": 0.0,
+      "total_claims": 0,
+      "supported_claims": 0,
+      "unsupported_claims": 0,
+      "zero_unsupported": 1,
+      "edges_updated": 118,
+      "edges_pruned": 0,
+      "alpha_before": 0.5009,
+      "alpha_after": 0.4901
+    },
+    "pass0_Q05": {
+      "pass": 0,
+      "query": "QR code localization method for indoor positioning system",
+      "type": "semantic",
+      "top5_scores": [
+        0.6865,
+        0.6865,
+        0.6628,
+        0.6628,
+        0.5769
+      ],
+      "mean_rerank": 0.6551,
+      "max_rerank": 0.6865,
+      "p5": 1.0,
+      "hr_mm5": 0,
+      "faithfulness_nli": 0.0,
+      "total_claims": 0,
+      "supported_claims": 0,
+      "unsupported_claims": 0,
+      "zero_unsupported": 1,
+      "edges_updated": 126,
+      "edges_pruned": 0,
+      "alpha_before": 0.4901,
+      "alpha_after": 0.4901
+    },
+    "pass0_Q06": {
+      "pass": 0,
+      "query": "turnstile gate passenger flow IFC element spatial model",
+      "type": "lexical",
+      "top5_scores": [
+        0.7116,
+        0.7116,
+        0.6778,
+        0.6778,
+        0.3258
+      ],
+      "mean_rerank": 0.6209,
+      "max_rerank": 0.7116,
+      "p5": 1.0,
+      "hr_mm5": 0,
+      "faithfulness_nli": 0.0,
+      "total_claims": 0,
+      "supported_claims": 0,
+      "unsupported_claims": 0,
+      "zero_unsupported": 1,
+      "edges_updated": 19,
+      "edges_pruned": 0,
+      "alpha_before": 0.4901,
+      "alpha_after": 0.4901
+    },
+    "pass0_Q07": {
+      "pass": 0,
+      "query": "How does spatial mapping in Unity relate to BIM coordinate systems for AR navigation?",
+      "type": "multi_hop",
+      "top5_scores": [
+        0.5327,
+        0.5327,
+        0.4922,
+        0.4922,
+        0.3551
+      ],
+      "mean_rerank": 0.481,
+      "max_rerank": 0.5327,
+      "p5": 1.0,
+      "hr_mm5": 0,
+      "faithfulness_nli": 0.0,
+      "total_claims": 0,
+      "supported_claims": 0,
+      "unsupported_claims": 0,
+      "zero_unsupported": 1,
+      "edges_updated": 113,
+      "edges_pruned": 0,
+      "alpha_before": 0.4901,
+      "alpha_after": 0.4724
+    },
+    "pass0_Q08": {
+      "pass": 0,
+      "query": "pedestrian simulation subway plaza evacuation route planning",
+      "type": "semantic",
+      "top5_scores": [
+        0.5577,
+        0.5577,
+        0.4605,
+        0.4599,
+        0.4599
+      ],
+      "mean_rerank": 0.4991,
+      "max_rerank": 0.5577,
+      "p5": 1.0,
+      "hr_mm5": 0,
+      "faithfulness_nli": 0.0,
+      "total_claims": 0,
+      "supported_claims": 0,
+      "unsupported_claims": 0,
+      "zero_unsupported": 1,
+      "edges_updated": 92,
+      "edges_pruned": 0,
+      "alpha_before": 0.4724,
+      "alpha_after": 0.4724
+    },
+    "pass0_Q09": {
+      "pass": 0,
+      "query": "What algorithms are used for shortest path computation in AR indoor navigation applications?",
+      "type": "multi_hop",
+      "top5_scores": [
+        0.8835,
+        0.8835,
+        0.856,
+        0.856,
+        0.829
+      ],
+      "mean_rerank": 0.8616,
+      "max_rerank": 0.8835,
+      "p5": 1.0,
+      "hr_mm5": 0,
+      "faithfulness_nli": 1.0,
+      "total_claims": 1,
+      "supported_claims": 1,
+      "unsupported_claims": 0,
+      "zero_unsupported": 1,
+      "edges_updated": 90,
+      "edges_pruned": 0,
+      "alpha_before": 0.4724,
+      "alpha_after": 0.4724
+    },
+    "pass0_Q10": {
+      "pass": 0,
+      "query": "Unity AR SDK marker detection coordinate transformation tracking",
+      "type": "lexical",
+      "top5_scores": [
+        0.4594,
+        0.4594,
+        0.4458,
+        0.4458,
+        0.4175
+      ],
+      "mean_rerank": 0.4456,
+      "max_rerank": 0.4594,
+      "p5": 1.0,
+      "hr_mm5": 0,
+      "faithfulness_nli": 0.0,
+      "total_claims": 0,
+      "supported_claims": 0,
+      "unsupported_claims": 0,
+      "zero_unsupported": 1,
+      "edges_updated": 68,
+      "edges_pruned": 0,
+      "alpha_before": 0.4724,
+      "alpha_after": 0.4724
+    },
+    "pass1_Q01": {
+      "pass": 1,
+      "query": "IfcSpace BIM indoor navigation turnstile",
+      "type": "lexical",
+      "top5_scores": [
+        0.7945,
+        0.7945,
+        0.5915,
+        0.5764,
+        0.5764
+      ],
+      "mean_rerank": 0.6667,
+      "max_rerank": 0.7945,
+      "p5": 1.0,
+      "hr_mm5": 0,
+      "faithfulness_nli": 1.0,
+      "total_claims": 4,
+      "supported_claims": 4,
+      "unsupported_claims": 0,
+      "zero_unsupported": 1,
+      "edges_updated": 45,
+      "edges_pruned": 0,
+      "alpha_before": 0.4724,
+      "alpha_after": 0.4555
+    },
+    "pass1_Q02": {
+      "pass": 1,
+      "query": "How does building information modelling support indoor wayfinding?",
+      "type": "semantic",
+      "top5_scores": [
+        0.7662,
+        0.7077,
+        0.7077,
+        0.6706,
+        0.6359
+      ],
+      "mean_rerank": 0.6976,
+      "max_rerank": 0.7662,
+      "p5": 1.0,
+      "hr_mm5": 0,
+      "faithfulness_nli": 1.0,
+      "total_claims": 5,
+      "supported_claims": 5,
+      "unsupported_claims": 0,
+      "zero_unsupported": 1,
+      "edges_updated": 50,
+      "edges_pruned": 0,
+      "alpha_before": 0.4555,
+      "alpha_after": 0.4395
+    },
+    "pass1_Q03": {
+      "pass": 1,
+      "query": "Unity Implementation Framework workflow diagram indoor navigation",
+      "type": "multi_modal_figure",
+      "top5_scores": [
+        0.8201,
+        0.8201,
+        0.6952,
+        0.6952,
+        0.6147
+      ],
+      "mean_rerank": 0.7291,
+      "max_rerank": 0.8201,
+      "p5": 1.0,
+      "hr_mm5": 0,
+      "faithfulness_nli": 0.0,
+      "total_claims": 0,
+      "supported_claims": 0,
+      "unsupported_claims": 0,
+      "zero_unsupported": 1,
+      "edges_updated": 129,
+      "edges_pruned": 0,
+      "alpha_before": 0.4395,
+      "alpha_after": 0.4298
+    },
+    "pass1_Q04": {
+      "pass": 1,
+      "query": "indoor navigation architecture diagram augmented reality system",
+      "type": "multi_modal_figure",
+      "top5_scores": [
+        0.8286,
+        0.8286,
+        0.8152,
+        0.8152,
+        0.7975
+      ],
+      "mean_rerank": 0.817,
+      "max_rerank": 0.8286,
+      "p5": 1.0,
+      "hr_mm5": 0,
+      "faithfulness_nli": 0.0,
+      "total_claims": 0,
+      "supported_claims": 0,
+      "unsupported_claims": 0,
+      "zero_unsupported": 1,
+      "edges_updated": 122,
+      "edges_pruned": 0,
+      "alpha_before": 0.4298,
+      "alpha_after": 0.4191
+    },
+    "pass1_Q05": {
+      "pass": 1,
+      "query": "QR code localization method for indoor positioning system",
+      "type": "semantic",
+      "top5_scores": [
+        0.6865,
+        0.6865,
+        0.6628,
+        0.6628,
+        0.5769
+      ],
+      "mean_rerank": 0.6551,
+      "max_rerank": 0.6865,
+      "p5": 1.0,
+      "hr_mm5": 0,
+      "faithfulness_nli": 0.0,
+      "total_claims": 0,
+      "supported_claims": 0,
+      "unsupported_claims": 0,
+      "zero_unsupported": 1,
+      "edges_updated": 124,
+      "edges_pruned": 0,
+      "alpha_before": 0.4191,
+      "alpha_after": 0.4191
+    },
+    "pass1_Q06": {
+      "pass": 1,
+      "query": "turnstile gate passenger flow IFC element spatial model",
+      "type": "lexical",
+      "top5_scores": [
+        0.7116,
+        0.7116,
+        0.6778,
+        0.6778,
+        0.3258
+      ],
+      "mean_rerank": 0.6209,
+      "max_rerank": 0.7116,
+      "p5": 1.0,
+      "hr_mm5": 0,
+      "faithfulness_nli": 0.0,
+      "total_claims": 0,
+      "supported_claims": 0,
+      "unsupported_claims": 0,
+      "zero_unsupported": 1,
+      "edges_updated": 22,
+      "edges_pruned": 0,
+      "alpha_before": 0.4191,
+      "alpha_after": 0.4191
+    },
+    "pass1_Q07": {
+      "pass": 1,
+      "query": "How does spatial mapping in Unity relate to BIM coordinate systems for AR navigation?",
+      "type": "multi_hop",
+      "top5_scores": [
+        0.7761,
+        0.7761,
+        0.5328,
+        0.5328,
+        0.5219
+      ],
+      "mean_rerank": 0.6279,
+      "max_rerank": 0.7761,
+      "p5": 1.0,
+      "hr_mm5": 0,
+      "faithfulness_nli": 0.0,
+      "total_claims": 0,
+      "supported_claims": 0,
+      "unsupported_claims": 0,
+      "zero_unsupported": 1,
+      "edges_updated": 148,
+      "edges_pruned": 0,
+      "alpha_before": 0.4191,
+      "alpha_after": 0.4191
+    },
+    "pass1_Q08": {
+      "pass": 1,
+      "query": "pedestrian simulation subway plaza evacuation route planning",
+      "type": "semantic",
+      "top5_scores": [
+        0.5577,
+        0.5577,
+        0.4605,
+        0.4599,
+        0.4599
+      ],
+      "mean_rerank": 0.4991,
+      "max_rerank": 0.5577,
+      "p5": 1.0,
+      "hr_mm5": 0,
+      "faithfulness_nli": 0.0,
+      "total_claims": 0,
+      "supported_claims": 0,
+      "unsupported_claims": 0,
+      "zero_unsupported": 1,
+      "edges_updated": 88,
+      "edges_pruned": 0,
+      "alpha_before": 0.4191,
+      "alpha_after": 0.4191
+    },
+    "pass1_Q09": {
+      "pass": 1,
+      "query": "What algorithms are used for shortest path computation in AR indoor navigation applications?",
+      "type": "multi_hop",
+      "top5_scores": [
+        0.856,
+        0.856,
+        0.829,
+        0.829,
+        0.8191
+      ],
+      "mean_rerank": 0.8378,
+      "max_rerank": 0.856,
+      "p5": 1.0,
+      "hr_mm5": 0,
+      "faithfulness_nli": 1.0,
+      "total_claims": 2,
+      "supported_claims": 2,
+      "unsupported_claims": 0,
+      "zero_unsupported": 1,
+      "edges_updated": 62,
+      "edges_pruned": 0,
+      "alpha_before": 0.4191,
+      "alpha_after": 0.4191
+    },
+    "pass1_Q10": {
+      "pass": 1,
+      "query": "Unity AR SDK marker detection coordinate transformation tracking",
+      "type": "lexical",
+      "top5_scores": [
+        0.4594,
+        0.4594,
+        0.4175,
+        0.4175,
+        0.4131
+      ],
+      "mean_rerank": 0.4334,
+      "max_rerank": 0.4594,
+      "p5": 1.0,
+      "hr_mm5": 0,
+      "faithfulness_nli": 0.0,
+      "total_claims": 0,
+      "supported_claims": 0,
+      "unsupported_claims": 0,
+      "zero_unsupported": 1,
+      "edges_updated": 64,
+      "edges_pruned": 0,
+      "alpha_before": 0.4191,
+      "alpha_after": 0.4139
+    },
+    "pass2_Q01": {
+      "pass": 2,
+      "query": "IfcSpace BIM indoor navigation turnstile",
+      "type": "lexical",
+      "top5_scores": [
+        0.7945,
+        0.7945,
+        0.5915,
+        0.5915,
+        0.5764
+      ],
+      "mean_rerank": 0.6697,
+      "max_rerank": 0.7945,
+      "p5": 1.0,
+      "hr_mm5": 0,
+      "faithfulness_nli": 0.0,
+      "total_claims": 0,
+      "supported_claims": 0,
+      "unsupported_claims": 0,
+      "zero_unsupported": 1,
+      "edges_updated": 102,
+      "edges_pruned": 0,
+      "alpha_before": 0.4139,
+      "alpha_after": 0.3956
+    },
+    "pass2_Q02": {
+      "pass": 2,
+      "query": "How does building information modelling support indoor wayfinding?",
+      "type": "semantic",
+      "top5_scores": [
+        0.7662,
+        0.7439,
+        0.7077,
+        0.7077,
+        0.6706
+      ],
+      "mean_rerank": 0.7192,
+      "max_rerank": 0.7662,
+      "p5": 1.0,
+      "hr_mm5": 0,
+      "faithfulness_nli": 1.0,
+      "total_claims": 4,
+      "supported_claims": 4,
+      "unsupported_claims": 0,
+      "zero_unsupported": 1,
+      "edges_updated": 57,
+      "edges_pruned": 0,
+      "alpha_before": 0.3956,
+      "alpha_after": 0.3956
+    },
+    "pass2_Q03": {
+      "pass": 2,
+      "query": "Unity Implementation Framework workflow diagram indoor navigation",
+      "type": "multi_modal_figure",
+      "top5_scores": [
+        0.8313,
+        0.8201,
+        0.8201,
+        0.6952,
+        0.6952
+      ],
+      "mean_rerank": 0.7724,
+      "max_rerank": 0.8313,
+      "p5": 1.0,
+      "hr_mm5": 1,
+      "faithfulness_nli": 1.0,
+      "total_claims": 2,
+      "supported_claims": 2,
+      "unsupported_claims": 0,
+      "zero_unsupported": 1,
+      "edges_updated": 93,
+      "edges_pruned": 1,
+      "alpha_before": 0.3956,
+      "alpha_after": 0.3809
+    },
+    "pass2_Q04": {
+      "pass": 2,
+      "query": "indoor navigation architecture diagram augmented reality system",
+      "type": "multi_modal_figure",
+      "top5_scores": [
+        0.8286,
+        0.8286,
+        0.8152,
+        0.8152,
+        0.7975
+      ],
+      "mean_rerank": 0.817,
+      "max_rerank": 0.8286,
+      "p5": 1.0,
+      "hr_mm5": 0,
+      "faithfulness_nli": 0.0,
+      "total_claims": 0,
+      "supported_claims": 0,
+      "unsupported_claims": 0,
+      "zero_unsupported": 1,
+      "edges_updated": 120,
+      "edges_pruned": 0,
+      "alpha_before": 0.3809,
+      "alpha_after": 0.3702
+    },
+    "pass2_Q05": {
+      "pass": 2,
+      "query": "QR code localization method for indoor positioning system",
+      "type": "semantic",
+      "top5_scores": [
+        0.6865,
+        0.6865,
+        0.6628,
+        0.6628,
+        0.5769
+      ],
+      "mean_rerank": 0.6551,
+      "max_rerank": 0.6865,
+      "p5": 1.0,
+      "hr_mm5": 0,
+      "faithfulness_nli": 0.0,
+      "total_claims": 0,
+      "supported_claims": 0,
+      "unsupported_claims": 0,
+      "zero_unsupported": 1,
+      "edges_updated": 95,
+      "edges_pruned": 0,
+      "alpha_before": 0.3702,
+      "alpha_after": 0.3562
+    },
+    "pass2_Q06": {
+      "pass": 2,
+      "query": "turnstile gate passenger flow IFC element spatial model",
+      "type": "lexical",
+      "top5_scores": [
+        0.7116,
+        0.7116,
+        0.6778,
+        0.6778,
+        0.3258
+      ],
+      "mean_rerank": 0.6209,
+      "max_rerank": 0.7116,
+      "p5": 1.0,
+      "hr_mm5": 0,
+      "faithfulness_nli": 0.0,
+      "total_claims": 0,
+      "supported_claims": 0,
+      "unsupported_claims": 0,
+      "zero_unsupported": 1,
+      "edges_updated": 19,
+      "edges_pruned": 1,
+      "alpha_before": 0.3562,
+      "alpha_after": 0.3562
+    },
+    "pass2_Q07": {
+      "pass": 2,
+      "query": "How does spatial mapping in Unity relate to BIM coordinate systems for AR navigation?",
+      "type": "multi_hop",
+      "top5_scores": [
+        0.5327,
+        0.5327,
+        0.4922,
+        0.4922,
+        0.3551
+      ],
+      "mean_rerank": 0.481,
+      "max_rerank": 0.5327,
+      "p5": 1.0,
+      "hr_mm5": 0,
+      "faithfulness_nli": 0.0,
+      "total_claims": 0,
+      "supported_claims": 0,
+      "unsupported_claims": 0,
+      "zero_unsupported": 1,
+      "edges_updated": 114,
+      "edges_pruned": 0,
+      "alpha_before": 0.3562,
+      "alpha_after": 0.3385
+    },
+    "pass2_Q08": {
+      "pass": 2,
+      "query": "pedestrian simulation subway plaza evacuation route planning",
+      "type": "semantic",
+      "top5_scores": [
+        0.5577,
+        0.5577,
+        0.4605,
+        0.4599,
+        0.4599
+      ],
+      "mean_rerank": 0.4991,
+      "max_rerank": 0.5577,
+      "p5": 1.0,
+      "hr_mm5": 0,
+      "faithfulness_nli": 0.0,
+      "total_claims": 0,
+      "supported_claims": 0,
+      "unsupported_claims": 0,
+      "zero_unsupported": 1,
+      "edges_updated": 89,
+      "edges_pruned": 4,
+      "alpha_before": 0.3385,
+      "alpha_after": 0.3385
+    },
+    "pass2_Q09": {
+      "pass": 2,
+      "query": "What algorithms are used for shortest path computation in AR indoor navigation applications?",
+      "type": "multi_hop",
+      "top5_scores": [
+        0.856,
+        0.856,
+        0.829,
+        0.829,
+        0.8191
+      ],
+      "mean_rerank": 0.8378,
+      "max_rerank": 0.856,
+      "p5": 1.0,
+      "hr_mm5": 0,
+      "faithfulness_nli": 1.0,
+      "total_claims": 2,
+      "supported_claims": 2,
+      "unsupported_claims": 0,
+      "zero_unsupported": 1,
+      "edges_updated": 51,
+      "edges_pruned": 3,
+      "alpha_before": 0.3385,
+      "alpha_after": 0.3385
+    },
+    "pass2_Q10": {
+      "pass": 2,
+      "query": "Unity AR SDK marker detection coordinate transformation tracking",
+      "type": "lexical",
+      "top5_scores": [
+        0.4594,
+        0.4594,
+        0.4458,
+        0.4458,
+        0.4175
+      ],
+      "mean_rerank": 0.4456,
+      "max_rerank": 0.4594,
+      "p5": 1.0,
+      "hr_mm5": 0,
+      "faithfulness_nli": 0.0,
+      "total_claims": 0,
+      "supported_claims": 0,
+      "unsupported_claims": 0,
+      "zero_unsupported": 1,
+      "edges_updated": 60,
+      "edges_pruned": 2,
+      "alpha_before": 0.3385,
+      "alpha_after": 0.3385
+    },
+    "post_run_state": {
+      "alpha": 0.3385,
+      "edges": {
+        "MENTIONS": {
+          "total": 805,
+          "pruned": 16,
+          "avg_weight": 0.4392,
+          "visits": 2780
+        },
+        "RELATED_TO": {
+          "total": 199,
+          "pruned": 1,
+          "avg_weight": 0.4257,
+          "visits": 824
+        }
+      }
+    }
+  }
+}
